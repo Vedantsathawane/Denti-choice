@@ -3,12 +3,14 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTooth, FaBars, FaTimes, FaSun, FaMoon, FaPhoneAlt } from 'react-icons/fa';
 import { useTheme } from '../../hooks/useTheme';
+import { useSettings } from '../../hooks/useSettings';
 import { NAV_LINKS } from '../../utils/constants';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
+  const { settings } = useSettings();
   const location = useLocation();
 
   useEffect(() => {
@@ -30,9 +32,9 @@ const Navbar = () => {
         <div className="gradient-primary">
           <div className="container-custom flex justify-between items-center py-2 text-white text-sm">
             <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1"><FaPhoneAlt className="text-xs" /> +1 (555) 123-4567</span>
+              <span className="flex items-center gap-1"><FaPhoneAlt className="text-xs" /> {settings.clinic_phone}</span>
               <span>|</span>
-              <span>Mon - Fri: 9:00 AM - 5:00 PM</span>
+              <span>Mon - Fri: {settings.opening_hours?.monday}</span>
             </div>
             <div className="flex items-center gap-4">
               <Link to="/appointment" className="hover:text-accent transition-colors">Book Appointment</Link>
@@ -55,7 +57,7 @@ const Navbar = () => {
               <FaTooth className="text-white text-xl" />
             </motion.div>
             <div>
-              <h1 className="text-xl font-bold gradient-text leading-tight">Denti-Choice</h1>
+              <h1 className="text-xl font-bold gradient-text leading-tight">{settings.clinic_name}</h1>
               <p className="text-[10px] text-gray-500 dark:text-gray-400 -mt-1 hidden sm:block">Your Smile, Our Priority</p>
             </div>
           </Link>

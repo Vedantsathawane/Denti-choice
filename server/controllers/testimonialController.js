@@ -4,7 +4,7 @@ const { success, created, error, paginated } = require('../utils/apiResponse');
 const TestimonialController = {
   async getAll(req, res, next) {
     try {
-      const { is_visible, page = 1, limit } = req.query;
+      const { is_visible, page = 1, limit } = { ...req.query, ...req.body };
       const filters = { page: parseInt(page) };
       if (is_visible !== undefined) filters.is_visible = parseInt(is_visible);
       if (limit) filters.limit = parseInt(limit);
@@ -19,7 +19,8 @@ const TestimonialController = {
 
   async getById(req, res, next) {
     try {
-      const testimonial = await TestimonialModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      const testimonial = await TestimonialModel.findById(id);
       if (!testimonial) return error(res, 'Testimonial not found.', 404);
       return success(res, testimonial);
     } catch (err) { next(err); }
@@ -37,27 +38,30 @@ const TestimonialController = {
 
   async update(req, res, next) {
     try {
-      const existing = await TestimonialModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      const existing = await TestimonialModel.findById(id);
       if (!existing) return error(res, 'Testimonial not found.', 404);
       const data = req.body;
       if (req.file) data.patient_photo = `/uploads/${req.file.filename}`;
-      await TestimonialModel.update(req.params.id, data);
-      const updated = await TestimonialModel.findById(req.params.id);
+      await TestimonialModel.update(id, data);
+      const updated = await TestimonialModel.findById(id);
       return success(res, updated, 'Testimonial updated successfully');
     } catch (err) { next(err); }
   },
 
   async toggleVisibility(req, res, next) {
     try {
-      await TestimonialModel.toggleVisibility(req.params.id);
-      const updated = await TestimonialModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      await TestimonialModel.toggleVisibility(id);
+      const updated = await TestimonialModel.findById(id);
       return success(res, updated, 'Visibility toggled successfully');
     } catch (err) { next(err); }
   },
 
   async delete(req, res, next) {
     try {
-      const deleted = await TestimonialModel.delete(req.params.id);
+      const id = req.body.id || req.params.id;
+      const deleted = await TestimonialModel.delete(id);
       if (!deleted) return error(res, 'Testimonial not found.', 404);
       return success(res, null, 'Testimonial deleted successfully');
     } catch (err) { next(err); }

@@ -6,7 +6,7 @@ const { TIME_SLOTS } = require('../utils/helpers');
 const AppointmentController = {
   async getAll(req, res, next) {
     try {
-      const { search, status, doctor_id, date, from_date, to_date, sort, order, page = 1, limit = 10 } = req.query;
+      const { search, status, doctor_id, date, from_date, to_date, sort, order, page = 1, limit = 10 } = { ...req.query, ...req.body };
       const filters = { search, status, doctor_id, date, from_date, to_date, sort, order, page: parseInt(page), limit: parseInt(limit) };
 
       const [appointments, total] = await Promise.all([
@@ -20,7 +20,8 @@ const AppointmentController = {
 
   async getById(req, res, next) {
     try {
-      const appointment = await AppointmentModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      const appointment = await AppointmentModel.findById(id);
       if (!appointment) return error(res, 'Appointment not found.', 404);
       return success(res, appointment);
     } catch (err) { next(err); }
@@ -67,6 +68,7 @@ const AppointmentController = {
   async updateStatus(req, res, next) {
     try {
       const { status, reason } = req.body;
+      const id = req.body.id || req.params.id;
       const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
 
       if (!validStatuses.includes(status)) {
@@ -74,7 +76,7 @@ const AppointmentController = {
       }
 
       const result = await AppointmentService.changeStatus(
-        req.params.id, status, req.user.name, reason
+        id, status, req.user.name, reason
       );
 
       if (!result) return error(res, 'Appointment not found.', 404);
@@ -84,17 +86,19 @@ const AppointmentController = {
 
   async update(req, res, next) {
     try {
-      const appointment = await AppointmentModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      const appointment = await AppointmentModel.findById(id);
       if (!appointment) return error(res, 'Appointment not found.', 404);
-      await AppointmentModel.update(req.params.id, req.body);
-      const updated = await AppointmentModel.findById(req.params.id);
+      await AppointmentModel.update(id, req.body);
+      const updated = await AppointmentModel.findById(id);
       return success(res, updated, 'Appointment updated successfully');
     } catch (err) { next(err); }
   },
 
   async delete(req, res, next) {
     try {
-      const deleted = await AppointmentModel.delete(req.params.id);
+      const id = req.body.id || req.params.id;
+      const deleted = await AppointmentModel.delete(id);
       if (!deleted) return error(res, 'Appointment not found.', 404);
       return success(res, null, 'Appointment deleted successfully');
     } catch (err) { next(err); }

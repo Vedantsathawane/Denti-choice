@@ -4,7 +4,7 @@ const { success, created, error, paginated } = require('../utils/apiResponse');
 const DoctorController = {
   async getAll(req, res, next) {
     try {
-      const { search, specialization, is_active, page = 1, limit } = req.query;
+      const { search, specialization, is_active, page = 1, limit } = { ...req.query, ...req.body };
       const filters = { search, specialization, page: parseInt(page) };
       if (is_active !== undefined) filters.is_active = parseInt(is_active);
       if (limit) filters.limit = parseInt(limit);
@@ -22,7 +22,8 @@ const DoctorController = {
 
   async getById(req, res, next) {
     try {
-      const doctor = await DoctorModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      const doctor = await DoctorModel.findById(id);
       if (!doctor) return error(res, 'Doctor not found.', 404);
       return success(res, doctor);
     } catch (err) { next(err); }
@@ -43,7 +44,8 @@ const DoctorController = {
 
   async update(req, res, next) {
     try {
-      const doctor = await DoctorModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      const doctor = await DoctorModel.findById(id);
       if (!doctor) return error(res, 'Doctor not found.', 404);
 
       const data = req.body;
@@ -51,19 +53,20 @@ const DoctorController = {
       if (typeof data.availability === 'string') data.availability = JSON.parse(data.availability);
       if (typeof data.social_links === 'string') data.social_links = JSON.parse(data.social_links);
 
-      await DoctorModel.update(req.params.id, data);
-      const updated = await DoctorModel.findById(req.params.id);
+      await DoctorModel.update(id, data);
+      const updated = await DoctorModel.findById(id);
       return success(res, updated, 'Doctor updated successfully');
     } catch (err) { next(err); }
   },
 
   async delete(req, res, next) {
     try {
-      const deleted = await DoctorModel.delete(req.params.id);
+      const id = req.body.id || req.params.id;
+      const deleted = await DoctorModel.delete(id);
       if (!deleted) return error(res, 'Doctor not found.', 404);
       return success(res, null, 'Doctor deleted successfully');
     } catch (err) { next(err); }
-  }
+  },
 };
 
 module.exports = DoctorController;

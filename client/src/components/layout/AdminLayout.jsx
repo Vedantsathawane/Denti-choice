@@ -8,7 +8,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
-import { getInitials } from '../../utils/helpers';
+import { getInitials, getApiImageUrl } from '../../utils/helpers';
 import Swal from 'sweetalert2';
 
 const sidebarLinks = [
@@ -144,9 +144,17 @@ const AdminLayout = () => {
               to="/dashboard/profile"
               className="flex items-center gap-2 pl-3 border-l border-gray-200 dark:border-gray-700"
             >
-              <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-semibold">
-                {getInitials(user?.name)}
-              </div>
+              {user?.avatar ? (
+                <img
+                  src={getApiImageUrl(user.avatar)}
+                  alt={user.name}
+                  className="w-9 h-9 rounded-full object-cover border border-gray-200 dark:border-gray-800"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-semibold">
+                  {getInitials(user?.name)}
+                </div>
+              )}
               <div className="hidden sm:block">
                 <p className="text-sm font-medium text-gray-800 dark:text-white leading-tight">{user?.name}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</p>

@@ -43,7 +43,8 @@ const AppointmentService = {
     const appointment = await AppointmentModel.findById(result.id);
 
     // 4. Send emails (non-blocking)
-    EmailService.sendBookingConfirmation(appointment).catch(e => logger.error('Email error', e));
+    // Disabled sendBookingConfirmation so patients only receive an email when their appointment is confirmed
+    // EmailService.sendBookingConfirmation(appointment).catch(e => logger.error('Email error', e));
     EmailService.sendAdminNotification(appointment).catch(e => logger.error('Email error', e));
     EmailService.sendDoctorNewPatient(appointment).catch(e => logger.error('Email error', e));
 

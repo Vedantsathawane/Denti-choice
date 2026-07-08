@@ -7,11 +7,11 @@ const { contactValidator, replyValidator } = require('../validators');
 // Public
 router.post('/', contactValidator, validate, ContactController.create);
 
-// Admin
-router.get('/', authMiddleware, ContactController.getAll);
-router.get('/:id', authMiddleware, ContactController.getById);
-router.patch('/:id/read', authMiddleware, ContactController.markAsRead);
-router.post('/:id/reply', authMiddleware, replyValidator, validate, ContactController.reply);
-router.delete('/:id', authMiddleware, ContactController.delete);
+// Admin routes
+router.post('/all', authMiddleware, ContactController.getAll);
+router.post('/by-id', authMiddleware, ContactController.getById);
+router.patch('/read', authMiddleware, ContactController.markAsRead);
+router.post('/reply', authMiddleware, replyValidator, validate, ContactController.reply);
+router.delete('/delete', authMiddleware, ContactController.delete);
 
 module.exports = router;

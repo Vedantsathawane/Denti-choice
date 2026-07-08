@@ -27,7 +27,7 @@ const AppointmentManagement = () => {
   const [status, setStatus] = useState('');
   const [doctorId, setDoctorId] = useState('');
   const [date, setDate] = useState('');
-  const [sort, setSort] = useState('a.appointment_date');
+  const [sort, setSort] = useState('a.id');
   const [order, setOrder] = useState('desc');
 
   // Master Data (for edit modal & filter dropdowns)
@@ -128,7 +128,7 @@ const AppointmentManagement = () => {
     setStatus('');
     setDoctorId('');
     setDate('');
-    setSort('a.appointment_date');
+    setSort('a.id');
     setOrder('desc');
     setPage(1);
   };
@@ -390,22 +390,22 @@ const AppointmentManagement = () => {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-sm text-gray-900 dark:text-gray-100">
                 {appointments.map((appt) => (
-                  <tr key={appt.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-850/50 transition-colors">
-                    <td className="p-4 font-mono text-xs font-bold text-gray-500 dark:text-gray-400">
+                  <tr key={appt.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition-colors">
+                    <td className="p-4 font-mono text-xs font-bold text-gray-500 dark:text-gray-300">
                       APT-{String(appt.id).padStart(5, '0')}
                     </td>
                     <td className="p-4">
                       <div className="font-semibold">{appt.patient_name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{appt.patient_phone}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-300">{appt.patient_phone}</div>
                     </td>
                     <td className="p-4">Dr. {appt.doctor_name.split(' ').pop()}</td>
                     <td className="p-4">
                       <div>{appt.service_name}</div>
-                      <div className="text-xs text-gray-500 font-medium">{formatCurrency(appt.service_price)}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-300 font-medium">{formatCurrency(appt.service_price)}</div>
                     </td>
                     <td className="p-4">
                       <div className="font-semibold flex items-center gap-1"><FaCalendarAlt className="text-primary text-xs shrink-0" /> {appt.appointment_date.split('T')[0]}</div>
-                      <div className="text-xs text-gray-500 flex items-center gap-1"><FaClock className="text-secondary text-xs shrink-0" /> {formatTime(appt.appointment_time)}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-300 flex items-center gap-1"><FaClock className="text-secondary text-xs shrink-0" /> {formatTime(appt.appointment_time)}</div>
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${

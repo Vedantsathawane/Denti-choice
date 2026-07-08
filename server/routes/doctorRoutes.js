@@ -6,12 +6,12 @@ const upload = require('../middlewares/uploadMiddleware');
 const { doctorValidator } = require('../validators');
 
 // Public
-router.get('/', DoctorController.getAll);
-router.get('/:id', DoctorController.getById);
+router.post('/all', DoctorController.getAll);
+router.post('/by-id', DoctorController.getById);
 
 // Admin only
 router.post('/', authMiddleware, upload.single('image'), doctorValidator, validate, DoctorController.create);
-router.put('/:id', authMiddleware, upload.single('image'), DoctorController.update);
-router.delete('/:id', authMiddleware, DoctorController.delete);
+router.put('/update', authMiddleware, upload.single('image'), DoctorController.update);
+router.delete('/delete', authMiddleware, DoctorController.delete);
 
 module.exports = router;

@@ -280,7 +280,7 @@ const ServiceManagement = () => {
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Teeth Cleaning"
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                     required
                   />
                 </div>
@@ -293,7 +293,7 @@ const ServiceManagement = () => {
                       value={duration}
                       onChange={e => setDuration(e.target.value)}
                       placeholder="e.g. 45 mins"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     />
                   </div>
@@ -305,7 +305,7 @@ const ServiceManagement = () => {
                       onChange={e => setPrice(e.target.value)}
                       placeholder="e.g. 150"
                       min={0}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     />
                   </div>
@@ -316,7 +316,7 @@ const ServiceManagement = () => {
                   <select
                     value={icon}
                     onChange={e => setIcon(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                     required
                   >
                     {Object.entries(AVAILABLE_ICONS).map(([key, val]) => (
@@ -332,7 +332,7 @@ const ServiceManagement = () => {
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                     placeholder="Enter comprehensive treatment details, procedure notes..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
                     required
                   />
                 </div>

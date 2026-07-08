@@ -4,7 +4,7 @@ const { success, error, paginated } = require('../utils/apiResponse');
 const NotificationController = {
   async getAll(req, res, next) {
     try {
-      const { is_read, type, page = 1, limit = 20 } = req.query;
+      const { is_read, type, page = 1, limit = 20 } = { ...req.query, ...req.body };
       const filters = { page: parseInt(page), limit: parseInt(limit) };
       if (is_read !== undefined) filters.is_read = parseInt(is_read);
       if (type) filters.type = type;
@@ -18,7 +18,8 @@ const NotificationController = {
 
   async markAsRead(req, res, next) {
     try {
-      await NotificationModel.markAsRead(req.params.id);
+      const id = req.body.id || req.params.id;
+      await NotificationModel.markAsRead(id);
       return success(res, null, 'Notification marked as read');
     } catch (err) { next(err); }
   },
@@ -32,7 +33,8 @@ const NotificationController = {
 
   async delete(req, res, next) {
     try {
-      const deleted = await NotificationModel.delete(req.params.id);
+      const id = req.body.id || req.params.id;
+      const deleted = await NotificationModel.delete(id);
       if (!deleted) return error(res, 'Notification not found.', 404);
       return success(res, null, 'Notification deleted');
     } catch (err) { next(err); }

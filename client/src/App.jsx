@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { SocketProvider } from './context/SocketContext';
 import Layout from './components/layout/Layout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -33,8 +34,9 @@ const Profile = lazy(() => import('./pages/Dashboard/Profile'));
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <SocketProvider>
+      <SettingsProvider>
+        <AuthProvider>
+          <SocketProvider>
           <Router>
             <ScrollToTop />
             <Suspense fallback={<LoadingSpinner fullPage />}>
@@ -86,7 +88,8 @@ function App() {
             theme="colored"
           />
         </SocketProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

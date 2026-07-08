@@ -4,16 +4,16 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validationMiddleware');
 const { appointmentValidator, statusValidator } = require('../validators');
 
-// Public
+// Public routes
 router.post('/', appointmentValidator, validate, AppointmentController.book);
 router.get('/slots', AppointmentController.getSlots);
 
-// Admin only
-router.get('/', authMiddleware, AppointmentController.getAll);
-router.get('/today', authMiddleware, AppointmentController.getToday);
-router.get('/:id', authMiddleware, AppointmentController.getById);
-router.put('/:id', authMiddleware, AppointmentController.update);
-router.patch('/:id/status', authMiddleware, statusValidator, validate, AppointmentController.updateStatus);
-router.delete('/:id', authMiddleware, AppointmentController.delete);
+// Admin routes
+router.post('/all', authMiddleware, AppointmentController.getAll);
+router.post('/today', authMiddleware, AppointmentController.getToday);
+router.post('/by-id', authMiddleware, AppointmentController.getById);
+router.put('/update', authMiddleware, AppointmentController.update);
+router.patch('/update-status', authMiddleware, statusValidator, validate, AppointmentController.updateStatus);
+router.delete('/delete', authMiddleware, AppointmentController.delete);
 
 module.exports = router;

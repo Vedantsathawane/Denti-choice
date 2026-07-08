@@ -59,7 +59,7 @@
   body {
     font-family: var(--font-sans);
     color: var(--color-dark);
-    background-color: var(--color-white);
+    background-color: #F8FAFC; /* Softer, premium slate off-white instead of stark white */
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -70,7 +70,7 @@
     width: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #F8FAFC;
   }
   ::-webkit-scrollbar-thumb {
     background: var(--color-primary);
@@ -96,10 +96,10 @@
   --color-dark: #F4F4F5;
   --color-dark-light: #E4E4E7;
   --color-white: #FFFFFF;         /* White remains white to support text-white compatibility */
-  --color-light: #0A0A0C;         /* Obsidian card color */
-  --color-gray-lighter: #16161A;  /* AMOLED border color */
-  --color-glass: rgba(0, 0, 0, 0.75);
-  --color-glass-border: rgba(38, 38, 44, 0.5);
+  --color-light: #151E2E;         /* Premium Slate card color */
+  --color-gray-lighter: #1F293D;  /* Dark border color */
+  --color-glass: rgba(11, 15, 25, 0.75);
+  --color-glass-border: rgba(31, 41, 61, 0.4);
 
   /* Overriding Tailwind base theme colors dynamically under .dark */
   --color-gray-50: #FAFAFA;       /* Light text and accents in dark mode */
@@ -110,9 +110,9 @@
   --color-gray-500: #71717A;
   --color-gray-600: #52525B;
   --color-gray-700: #27272A;
-  --color-gray-800: #16161C;      /* Border / select background */
-  --color-gray-900: #0A0A0C;      /* Obsidian card background */
-  --color-gray-950: #000000;      /* Pure AMOLED black background */
+  --color-gray-800: #1F293D;      /* Border / select background */
+  --color-gray-900: #151E2E;      /* Obsidian card background */
+  --color-gray-950: #0B0F19;      /* Cozy Midnight background */
 
   --color-slate-50: #F8FAFC;
   --color-slate-100: #F1F5F9;
@@ -122,18 +122,18 @@
   --color-slate-500: #64748B;
   --color-slate-600: #475569;
   --color-slate-700: #334155;
-  --color-slate-800: #16161C;
-  --color-slate-900: #0A0A0C;
-  --color-slate-950: #000000;
+  --color-slate-800: #1F293D;
+  --color-slate-900: #151E2E;
+  --color-slate-950: #0B0F19;
 }
 
 .dark body {
-  background-color: #000000;
+  background-color: #0B0F19;
   color: #F4F4F5;
 }
 
 .dark ::-webkit-scrollbar-track {
-  background: #0A0A0C;
+  background: #0B0F19;
 }
 
 /* ============================================
@@ -150,16 +150,16 @@
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.85); /* Slightly increased opacity for better readability on light background */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: var(--shadow-glass);
   }
 
   .dark .glass-card {
-    background: rgba(30, 41, 59, 0.7);
-    border-color: rgba(51, 65, 85, 0.5);
+    background: rgba(21, 30, 46, 0.7);
+    border-color: rgba(31, 41, 61, 0.5);
   }
 
   /* Gradient text */
@@ -247,30 +247,148 @@
 /* React Calendar customization */
 .react-calendar {
   border: none !important;
-  border-radius: 12px !important;
+  border-radius: 0 !important;
   font-family: var(--font-sans) !important;
-  box-shadow: var(--shadow-card) !important;
-  padding: 10px !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #1f2937 !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 0 auto;
 }
 
+/* Dark mode support */
+.dark .react-calendar {
+  background: transparent !important;
+  color: #faf9f6 !important;
+}
+
+/* Navigation header */
+.react-calendar__navigation {
+  display: flex !important;
+  height: 44px !important;
+  margin-bottom: 1em !important;
+}
+
+.react-calendar__navigation button {
+  min-width: 44px !important;
+  background: transparent !important;
+  border: none !important;
+  color: inherit !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.react-calendar__navigation button:hover:not(:disabled),
+.react-calendar__navigation button:focus {
+  background-color: rgba(0, 102, 255, 0.08) !important;
+}
+.dark .react-calendar__navigation button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.react-calendar__navigation button:disabled {
+  background-color: transparent !important;
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+}
+
+/* Month view weekday headers */
+.react-calendar__month-view__weekdays {
+  text-align: center !important;
+  text-transform: uppercase !important;
+  font-weight: bold !important;
+  font-size: 0.75em !important;
+  color: #4b5563 !important;
+  margin-bottom: 8px !important;
+}
+.dark .react-calendar__month-view__weekdays {
+  color: #9ca3af !important;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+/* Calendar Days Grid */
+.react-calendar__month-view__days__day {
+  color: inherit !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #9ca3af !important;
+  opacity: 0.4 !important;
+}
+.dark .react-calendar__month-view__days__day--neighboringMonth {
+  color: #6b7280 !important;
+}
+
+/* Tiles (Days) */
+.react-calendar__tile {
+  max-width: 100% !important;
+  padding: 12px 10px !important;
+  background: transparent !important;
+  border: none !important;
+  text-align: center !important;
+  line-height: 16px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  color: inherit !important;
+  transition: all 0.2s ease !important;
+}
+
+.react-calendar__tile:hover:not(:disabled) {
+  background-color: rgba(0, 102, 255, 0.08) !important;
+  color: var(--color-primary) !important;
+}
+.dark .react-calendar__tile:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+.react-calendar__tile:disabled {
+  background-color: transparent !important;
+  color: #d1d5db !important;
+  opacity: 0.25 !important;
+  cursor: not-allowed !important;
+}
+.dark .react-calendar__tile:disabled {
+  color: #4b5563 !important;
+}
+
+/* Active Day Selected */
 .react-calendar__tile--active {
   background: var(--color-primary) !important;
-  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+.react-calendar__tile--active:hover:not(:disabled),
+.react-calendar__tile--active:focus {
+  background: var(--color-primary-dark) !important;
+  color: #ffffff !important;
 }
 
+/* Today's Day */
 .react-calendar__tile--now {
-  background: var(--color-accent) !important;
-  border-radius: 8px !important;
+  background: rgba(123, 44, 191, 0.1) !important;
+  color: var(--color-accent) !important;
+  border: 1px solid var(--color-accent) !important;
+  font-weight: 600 !important;
 }
-
-.react-calendar__tile:hover {
-  background: var(--color-accent-light) !important;
-  border-radius: 8px !important;
+.react-calendar__tile--now:hover:not(:disabled) {
+  background: rgba(123, 44, 191, 0.2) !important;
 }
-
-.react-calendar__navigation button:hover {
-  background: var(--color-accent-light) !important;
-  border-radius: 8px !important;
+.react-calendar__tile--active.react-calendar__tile--now {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
 /* Swiper customization */
@@ -315,4 +433,69 @@
 .dark .skeleton-loader {
   background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%);
   background-size: 200% 100%;
+}
+
+/* Custom styled select dropdowns with inset arrow */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 2.5rem !important;
+}
+
+.dark select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+}
+
+/* Enhance form inputs, textareas, and selects visibility when not focused */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+input[type="search"],
+textarea,
+select {
+  border-color: #d1d5db !important; /* Higher contrast gray-300 for light mode */
+}
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="tel"],
+.dark input[type="number"],
+.dark input[type="password"],
+.dark input[type="date"],
+.dark input[type="search"],
+.dark textarea,
+.dark select {
+  border-color: #4b5563 !important; /* Higher contrast gray-600 for dark mode */
+}
+
+/* Maintain primary color focus state */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary) !important;
+}
+
+/* Custom styled visible placeholder text globally */
+::placeholder {
+  color: #6b7280 !important; /* gray-500 in light mode */
+  opacity: 1 !important; /* Prevent browser opacity reduction */
+}
+
+.dark ::placeholder {
+  color: #9ca3af !important; /* gray-400 in dark mode */
+  opacity: 1 !important;
 }

@@ -4,7 +4,7 @@ const { success, error, paginated } = require('../utils/apiResponse');
 const PatientController = {
   async getAll(req, res, next) {
     try {
-      const { search, page = 1, limit = 10 } = req.query;
+      const { search, page = 1, limit = 10 } = { ...req.query, ...req.body };
       const filters = { search, page: parseInt(page), limit: parseInt(limit) };
       const [patients, total] = await Promise.all([
         PatientModel.findAll(filters),
@@ -16,7 +16,8 @@ const PatientController = {
 
   async getById(req, res, next) {
     try {
-      const patient = await PatientModel.findById(req.params.id);
+      const id = req.body.id || req.params.id;
+      const patient = await PatientModel.findById(id);
       if (!patient) return error(res, 'Patient not found.', 404);
       return success(res, patient);
     } catch (err) { next(err); }

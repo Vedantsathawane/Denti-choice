@@ -13,6 +13,7 @@ import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { testimonialService, doctorService, serviceService } from '../../services/dataService';
+import { useSettings } from '../../hooks/useSettings';
 
 // Animation variants
 const fadeInUp = {
@@ -50,6 +51,7 @@ const Counter = ({ end, label, icon: Icon, suffix = '' }) => {
 };
 
 const Home = () => {
+  const { settings } = useSettings();
   const [testimonials, setTestimonials] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [services, setServices] = useState([]);
@@ -66,7 +68,7 @@ const Home = () => {
   const faqs = [
     { q: 'How often should I visit the dentist?', a: 'We recommend visiting the dentist every 6 months for regular check-ups and professional cleaning. However, if you have specific dental concerns, more frequent visits may be necessary.' },
     { q: 'Does teeth whitening damage enamel?', a: 'Professional teeth whitening performed at our clinic is completely safe for your enamel. We use FDA-approved products and carefully control the concentration and application time.' },
-    { q: 'What should I do in a dental emergency?', a: 'Contact us immediately at +1 (555) 123-4567. We offer priority emergency scheduling. For knocked-out teeth, keep the tooth moist and come in within 30 minutes for the best chance of saving it.' },
+    { q: 'What should I do in a dental emergency?', a: `Contact us immediately at ${settings.clinic_phone || '+1 (555) 123-4567'}. We offer priority emergency scheduling. For knocked-out teeth, keep the tooth moist and come in within 30 minutes for the best chance of saving it.` },
     { q: 'Are dental implants painful?', a: 'The implant procedure is performed under local anesthesia, so you will not feel pain during the procedure. Post-operative discomfort is typically mild and managed with over-the-counter pain medication.' },
     { q: 'Do you accept dental insurance?', a: 'Yes, we accept most major dental insurance plans. Our front desk team will help you verify your coverage and maximize your benefits. We also offer flexible payment plans.' }
   ];

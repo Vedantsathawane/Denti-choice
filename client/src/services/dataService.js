@@ -1,67 +1,88 @@
 import api from './api';
 
 export const doctorService = {
-  getAll: (params) => api.get('/doctors', { params }),
-  getById: (id) => api.get(`/doctors/${id}`),
+  getAll: (data) => api.post('/doctors/all', data),
+  getById: (id) => api.post(`/doctors/by-id`, { id }),
   create: (data) => api.post('/doctors', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  update: (id, data) => api.put(`/doctors/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  delete: (id) => api.delete(`/doctors/${id}`)
+  update: (id, data) => {
+    if (data instanceof FormData) {
+      if (!data.has('id')) data.append('id', id);
+    } else {
+      data = { id, ...data };
+    }
+    return api.put(`/doctors/update`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  delete: (id) => api.delete(`/doctors/delete`, { data: { id } })
 };
 
 export const serviceService = {
-  getAll: (params) => api.get('/services', { params }),
-  getById: (id) => api.get(`/services/${id}`),
+  getAll: (data) => api.post('/services/all', data),
+  getById: (id) => api.post(`/services/by-id`, { id }),
   create: (data) => api.post('/services', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  update: (id, data) => api.put(`/services/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  delete: (id) => api.delete(`/services/${id}`)
+  update: (id, data) => {
+    if (data instanceof FormData) {
+      if (!data.has('id')) data.append('id', id);
+    } else {
+      data = { id, ...data };
+    }
+    return api.put(`/services/update`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  delete: (id) => api.delete(`/services/delete`, { data: { id } })
 };
 
 export const appointmentService = {
-  getAll: (params) => api.get('/appointments', { params }),
-  getById: (id) => api.get(`/appointments/${id}`),
+  getAll: (data) => api.post('/appointments/all', data),
+  getById: (id) => api.post(`/appointments/by-id`, { id }),
   book: (data) => api.post('/appointments', data),
-  update: (id, data) => api.put(`/appointments/${id}`, data),
-  updateStatus: (id, data) => api.patch(`/appointments/${id}/status`, data),
-  delete: (id) => api.delete(`/appointments/${id}`),
+  update: (id, data) => api.put(`/appointments/update`, { id, ...data }),
+  updateStatus: (id, data) => api.patch(`/appointments/update-status`, { id, ...data }),
+  delete: (id) => api.delete(`/appointments/delete`, { data: { id } }),
   getSlots: (doctorId, date) => api.get('/appointments/slots', { params: { doctor_id: doctorId, date } }),
-  getToday: () => api.get('/appointments/today')
+  getToday: () => api.post('/appointments/today')
 };
 
 export const testimonialService = {
-  getAll: (params) => api.get('/testimonials', { params }),
-  getById: (id) => api.get(`/testimonials/${id}`),
+  getAll: (data) => api.post('/testimonials/all', data),
+  getById: (id) => api.post(`/testimonials/by-id`, { id }),
   create: (data) => api.post('/testimonials', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  update: (id, data) => api.put(`/testimonials/${id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  toggleVisibility: (id) => api.patch(`/testimonials/${id}/visibility`),
-  delete: (id) => api.delete(`/testimonials/${id}`)
+  update: (id, data) => {
+    if (data instanceof FormData) {
+      if (!data.has('id')) data.append('id', id);
+    } else {
+      data = { id, ...data };
+    }
+    return api.put(`/testimonials/update`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  toggleVisibility: (id) => api.patch(`/testimonials/visibility`, { id }),
+  delete: (id) => api.delete(`/testimonials/delete`, { data: { id } })
 };
 
 export const contactService = {
   submit: (data) => api.post('/contact', data),
-  getAll: (params) => api.get('/contact', { params }),
-  getById: (id) => api.get(`/contact/${id}`),
-  markAsRead: (id) => api.patch(`/contact/${id}/read`),
-  reply: (id, data) => api.post(`/contact/${id}/reply`, data),
-  delete: (id) => api.delete(`/contact/${id}`)
+  getAll: (data) => api.post('/contact/all', data),
+  getById: (id) => api.post(`/contact/by-id`, { id }),
+  markAsRead: (id) => api.patch(`/contact/read`, { id }),
+  reply: (id, data) => api.post(`/contact/reply`, { id, ...data }),
+  delete: (id) => api.delete(`/contact/delete`, { data: { id } })
 };
 
 export const settingService = {
-  getAll: () => api.get('/settings'),
-  update: (data) => api.put('/settings', data)
+  getAll: () => api.post('/settings/all'),
+  update: (data) => api.put('/settings/update', data)
 };
 
 export const dashboardService = {
-  getStats: () => api.get('/dashboard/stats'),
-  getRecent: () => api.get('/dashboard/recent'),
-  getChartData: (year) => api.get('/dashboard/chart-data', { params: { year } })
+  getStats: () => api.post('/dashboard/stats'),
+  getRecent: () => api.post('/dashboard/recent'),
+  getChartData: (year) => api.post('/dashboard/chart-data', { year })
 };
 
 export const notificationService = {
-  getAll: (params) => api.get('/notifications', { params }),
-  getUnreadCount: () => api.get('/notifications/unread-count'),
-  markAsRead: (id) => api.patch(`/notifications/${id}/read`),
+  getAll: (data) => api.post('/notifications/all', data),
+  getUnreadCount: () => api.post('/notifications/unread-count'),
+  markAsRead: (id) => api.patch(`/notifications/read`, { id }),
   markAllAsRead: () => api.patch('/notifications/read-all'),
-  delete: (id) => api.delete(`/notifications/${id}`)
+  delete: (id) => api.delete(`/notifications/delete`, { data: { id } })
 };
 
 export const authService = {

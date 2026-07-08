@@ -4,8 +4,10 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane } from 'react-icons/fa';
 import { contactService } from '../../services/dataService';
+import { useSettings } from '../../hooks/useSettings';
 
 const Contact = () => {
+  const { settings } = useSettings();
   const [submitting, setSubmitting] = useState(false);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
@@ -23,10 +25,10 @@ const Contact = () => {
   };
 
   const contactInfo = [
-    { icon: FaPhoneAlt, title: 'Call Us', detail: '+1 (555) 123-4567', sub: '+1 (555) 987-6543' },
-    { icon: FaEnvelope, title: 'Email Us', detail: 'info@dentichoice.com', sub: 'support@dentichoice.com' },
-    { icon: FaMapMarkerAlt, title: 'Visit Us', detail: '123 Dental Avenue', sub: 'New York, NY 10001' },
-    { icon: FaClock, title: 'Working Hours', detail: 'Mon-Fri: 9AM - 5PM', sub: 'Sat: 10AM - 2PM' }
+    { icon: FaPhoneAlt, title: 'Call Us', detail: settings.clinic_phone, sub: settings.clinic_phone_secondary },
+    { icon: FaEnvelope, title: 'Email Us', detail: settings.clinic_email, sub: 'support@dentichoice.com' },
+    { icon: FaMapMarkerAlt, title: 'Visit Us', detail: settings.clinic_address || '123 Dental Avenue', sub: '' },
+    { icon: FaClock, title: 'Working Hours', detail: `Mon-Fri: ${settings.opening_hours?.monday || '9AM - 5PM'}`, sub: `Sat: ${settings.opening_hours?.saturday || '10AM - 2PM'}` }
   ];
 
   return (
@@ -61,6 +63,18 @@ const Contact = () => {
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{title}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{detail}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-500">{sub}</p>
+                {title === 'Visit Us' && settings.google_maps_url && (
+                  <div className="mt-3">
+                    <a
+                      href={settings.google_maps_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs text-primary dark:text-secondary hover:underline font-semibold"
+                    >
+                      Show on Map →
+                    </a>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>

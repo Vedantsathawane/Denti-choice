@@ -30,6 +30,22 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 80 } }
 };
 
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-2.5 rounded-xl shadow-lg text-xs">
+        <p className="font-semibold text-gray-900 dark:text-white mb-1">{label}</p>
+        {payload.map((item, idx) => (
+          <p key={idx} className="text-gray-600 dark:text-gray-300 font-medium">
+            {item.name}: <span className="font-bold text-gray-900 dark:text-white">{item.value}</span>
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 const DashboardHome = () => {
   const { darkMode } = useTheme();
   const activeColors = darkMode ? BLUE_COLORS : PINK_COLORS;
@@ -224,14 +240,7 @@ const DashboardHome = () => {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-gray-100 dark:stroke-gray-800" />
                 <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} tickLine={false} />
                 <YAxis stroke="#9CA3AF" fontSize={12} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '12px'
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Area type="monotone" dataKey="Appointments" stroke={monthlyStrokeColor} strokeWidth={2} fillOpacity={1} fill="url(#colorAppts)" />
               </AreaChart>
             </ResponsiveContainer>
@@ -250,14 +259,7 @@ const DashboardHome = () => {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-gray-100 dark:stroke-gray-800" />
                 <XAxis dataKey="name" stroke="#9CA3AF" fontSize={10} tickLine={false} />
                 <YAxis stroke="#9CA3AF" fontSize={12} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    fontSize: '12px'
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} cursor={false} />
                 <Bar dataKey="Count" radius={[6, 6, 0, 0]}>
                   {formattedPopularData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={activeColors[index % activeColors.length]} />

@@ -367,7 +367,7 @@ const DoctorManagement = () => {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Photo upload container */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 bg-gray-50 dark:bg-gray-850 p-4 rounded-2xl border border-gray-150 dark:border-gray-800">
+                <div className="flex flex-col sm:flex-row items-center gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-2xl border border-gray-150 dark:border-gray-800">
                   <div className="w-24 h-24 rounded-2xl bg-gray-200 dark:bg-gray-800 overflow-hidden relative group border border-gray-300 dark:border-gray-750 flex items-center justify-center shrink-0">
                     {imagePreview ? (
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -393,7 +393,7 @@ const DoctorManagement = () => {
                       value={name}
                       onChange={e => setName(e.target.value)}
                       placeholder="Dr. John Doe"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     />
                   </div>
@@ -402,7 +402,7 @@ const DoctorManagement = () => {
                     <select
                       value={spec}
                       onChange={e => setSpec(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     >
                       {SPECIALIZATIONS.map(sp => (
@@ -420,7 +420,7 @@ const DoctorManagement = () => {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       placeholder="john.doe@dentichoice.com"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     />
                   </div>
@@ -431,7 +431,7 @@ const DoctorManagement = () => {
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
                       placeholder="+1-555-0100"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     />
                   </div>
@@ -445,7 +445,7 @@ const DoctorManagement = () => {
                       value={qualification}
                       onChange={e => setQualification(e.target.value)}
                       placeholder="DDS, DMD, MS"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     />
                   </div>
@@ -456,7 +456,7 @@ const DoctorManagement = () => {
                       value={experience}
                       onChange={e => setExperience(parseInt(e.target.value) || 0)}
                       min={0}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                       required
                     />
                   </div>
@@ -465,7 +465,7 @@ const DoctorManagement = () => {
                 {/* Day selector checkboxes */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Availability Schedule</label>
-                  <div className="flex flex-wrap gap-2.5 bg-gray-50 dark:bg-gray-850 p-4 border border-gray-150 dark:border-gray-800 rounded-2xl">
+                  <div className="flex flex-wrap gap-2.5 bg-gray-50 dark:bg-gray-800 p-4 border border-gray-150 dark:border-gray-800 rounded-2xl">
                     {DAYS_OF_WEEK.map(day => {
                       const checked = availability.includes(day);
                       return (
@@ -476,7 +476,7 @@ const DoctorManagement = () => {
                           className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                             checked
                               ? 'gradient-primary text-white border-primary shadow-sm'
-                              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-850 text-gray-500 dark:text-gray-400'
+                              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400'
                           }`}
                         >
                           {day}
@@ -494,7 +494,7 @@ const DoctorManagement = () => {
                     value={bio}
                     onChange={e => setBio(e.target.value)}
                     placeholder="Enter short biography details..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm resize-none"
                   />
                 </div>
 
@@ -509,7 +509,7 @@ const DoctorManagement = () => {
                         placeholder="Facebook URL"
                         value={socialLinks.facebook}
                         onChange={e => handleSocialChange('facebook', e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
                       />
                     </div>
                     <div className="relative">
@@ -519,7 +519,7 @@ const DoctorManagement = () => {
                         placeholder="Twitter URL"
                         value={socialLinks.twitter}
                         onChange={e => handleSocialChange('twitter', e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
                       />
                     </div>
                     <div className="relative">
@@ -529,7 +529,7 @@ const DoctorManagement = () => {
                         placeholder="LinkedIn URL"
                         value={socialLinks.linkedin}
                         onChange={e => handleSocialChange('linkedin', e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
                       />
                     </div>
                     <div className="relative">
@@ -539,7 +539,7 @@ const DoctorManagement = () => {
                         placeholder="Instagram URL"
                         value={socialLinks.instagram}
                         onChange={e => handleSocialChange('instagram', e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
                       />
                     </div>
                   </div>

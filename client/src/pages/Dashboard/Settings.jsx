@@ -4,11 +4,13 @@ import { FaSave, FaClinicMedical, FaClock, FaMailBulk, FaGlobe } from 'react-ico
 import { toast } from 'react-toastify';
 import { toastError } from '../../services/api';
 import { settingService } from '../../services/dataService';
+import { useSettings } from '../../hooks/useSettings';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 const Settings = () => {
+  const { fetchSettings: refreshGlobalSettings } = useSettings();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('general');
 
@@ -97,6 +99,7 @@ const Settings = () => {
       await settingService.update(payload);
       toast.success('Settings updated successfully.');
       fetchSettings();
+      refreshGlobalSettings();
     } catch {
       toast.error('Failed to save settings.');
     }

@@ -44,7 +44,7 @@ const DashboardController = {
 
   async getChartData(req, res, next) {
     try {
-      const year = req.query.year || new Date().getFullYear();
+      const year = req.body.year || req.query.year || new Date().getFullYear();
       const [monthly, popular] = await Promise.all([
         AppointmentModel.getMonthlyStats(year),
         ServiceModel.getPopular()

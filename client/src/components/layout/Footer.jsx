@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { FaTooth, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaChevronRight } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import { useSettings } from '../../hooks/useSettings';
 
 const Footer = () => {
+  const { settings } = useSettings();
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [
@@ -20,10 +22,10 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { icon: FaFacebookF, href: '#', label: 'Facebook' },
-    { icon: FaTwitter, href: '#', label: 'Twitter' },
-    { icon: FaInstagram, href: '#', label: 'Instagram' },
-    { icon: FaLinkedinIn, href: '#', label: 'LinkedIn' }
+    { icon: FaFacebookF, href: settings.social_facebook || '#', label: 'Facebook' },
+    { icon: FaTwitter, href: settings.social_twitter || '#', label: 'Twitter' },
+    { icon: FaInstagram, href: settings.social_instagram || '#', label: 'Instagram' },
+    { icon: FaLinkedinIn, href: settings.social_linkedin || '#', label: 'LinkedIn' }
   ];
 
   return (
@@ -38,7 +40,7 @@ const Footer = () => {
                 <FaTooth className="text-white text-xl" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Denti-Choice</h3>
+                <h3 className="text-xl font-bold text-white">{settings.clinic_name}</h3>
                 <p className="text-[10px] text-gray-400 -mt-0.5">Your Smile, Our Priority</p>
               </div>
             </Link>
@@ -102,15 +104,27 @@ const Footer = () => {
             <ul className="space-y-5">
               <li className="flex items-start gap-3">
                 <FaMapMarkerAlt className="text-primary mt-1 shrink-0" />
-                <span className="text-sm">123 Dental Avenue, Healthcare District, New York, NY 10001</span>
+                <div className="flex flex-col">
+                  <span className="text-sm">{settings.clinic_address}</span>
+                  {settings.google_maps_url && (
+                    <a
+                      href={settings.google_maps_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline mt-1 font-semibold flex items-center gap-1"
+                    >
+                      Show on Map →
+                    </a>
+                  )}
+                </div>
               </li>
               <li className="flex items-center gap-3">
                 <FaPhoneAlt className="text-primary shrink-0" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <span className="text-sm">{settings.clinic_phone}</span>
               </li>
               <li className="flex items-center gap-3">
                 <FaEnvelope className="text-primary shrink-0" />
-                <span className="text-sm">info@dentichoice.com</span>
+                <span className="text-sm">{settings.clinic_email}</span>
               </li>
             </ul>
 
@@ -118,9 +132,9 @@ const Footer = () => {
             <div className="mt-8">
               <h5 className="text-white font-medium text-sm mb-4">Opening Hours</h5>
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between"><span>Mon - Fri</span><span className="text-primary">9:00 AM - 5:00 PM</span></div>
-                <div className="flex justify-between"><span>Saturday</span><span className="text-primary">10:00 AM - 2:00 PM</span></div>
-                <div className="flex justify-between"><span>Sunday</span><span className="text-red-400">Closed</span></div>
+                <div className="flex justify-between"><span>Mon - Fri</span><span className="text-primary">{settings.opening_hours?.monday}</span></div>
+                <div className="flex justify-between"><span>Saturday</span><span className="text-primary">{settings.opening_hours?.saturday}</span></div>
+                <div className="flex justify-between"><span>Sunday</span><span className={settings.opening_hours?.sunday === 'Closed' ? 'text-red-400' : 'text-primary'}>{settings.opening_hours?.sunday}</span></div>
               </div>
             </div>
           </div>
@@ -131,6 +145,9 @@ const Footer = () => {
       <div className="border-t border-gray-800">
         <div className="container-custom py-7 flex flex-col md:flex-row justify-between items-center gap-3 text-sm">
           <p>© {currentYear} Denti-Choice. All rights reserved.</p>
+          <p className="text-gray-400 text-center font-medium">
+            Made by <span className="font-semibold text-white hover:text-gray-300 transition-colors cursor-default">Vedant Sathawane & Team</span>
+          </p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
