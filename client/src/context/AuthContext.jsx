@@ -5,7 +5,7 @@ export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(localStorage.getItem('token') || sessionStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.data);
     } catch {
       localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       setToken(null);
       setUser(null);
     } finally {
@@ -34,7 +35,14 @@ export const AuthProvider = ({ children }) => {
     const { token: newToken, user: userData } = res.data.data;
     setToken(newToken);
     setUser(userData);
-    localStorage.setItem('token', newToken);
+    
+    if (remember) {
+      localStorage.setItem('token', newToken);
+      sessionStorage.removeItem('token');
+    } else {
+      sessionStorage.setItem('token', newToken);
+      localStorage.removeItem('token');
+    }
     return res.data;
   };
 
@@ -47,6 +55,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
   };
 
   const updateUser = (userData) => {

@@ -1,3 +1,4 @@
+const dayjs = require('dayjs');
 const AppointmentModel = require('../models/appointmentModel');
 const AppointmentService = require('../services/appointmentService');
 const { success, error, paginated } = require('../utils/apiResponse');
@@ -32,6 +33,18 @@ const AppointmentController = {
    */
   async book(req, res, next) {
     try {
+      const { appointment_date, appointment_time } = req.body;
+      const todayStr = dayjs().format('YYYY-MM-DD');
+
+      if (appointment_date === todayStr) {
+        const currentTime = dayjs().format('HH:mm:ss');
+        if (appointment_time < currentTime) {
+          return error(res, 'Cannot book an appointment for a past time slot today.', 400);
+        }
+      } else if (dayjs(appointment_date).isBefore(dayjs(), 'day')) {
+        return error(res, 'Cannot book an appointment for a past date.', 400);
+      }
+
       const result = await AppointmentService.book(req.body);
 
       if (result.error === 'SLOT_TAKEN') {
@@ -53,9 +66,14 @@ const AppointmentController = {
       }
 
       const bookedSlots = await AppointmentModel.getBookedSlots(doctor_id, date);
+      
+      const todayStr = dayjs().format('YYYY-MM-DD');
+      const isToday = date === todayStr;
+      const currentTime = dayjs().format('HH:mm:ss');
+
       const availableSlots = TIME_SLOTS.map(slot => ({
         time: slot,
-        available: !bookedSlots.includes(slot)
+        available: !bookedSlots.includes(slot) && !(isToday && slot < currentTime)
       }));
 
       return success(res, { slots: availableSlots, bookedSlots });
@@ -89,6 +107,23 @@ const AppointmentController = {
       const id = req.body.id || req.params.id;
       const appointment = await AppointmentModel.findById(id);
       if (!appointment) return error(res, 'Appointment not found.', 404);
+
+      const { appointment_date, appointment_time } = req.body;
+      if (appointment_date || appointment_time) {
+        const targetDate = appointment_date || appointment.appointment_date;
+        const targetTime = appointment_time || appointment.appointment_time;
+
+        const todayStr = dayjs().format('YYYY-MM-DD');
+        if (targetDate === todayStr) {
+          const currentTime = dayjs().format('HH:mm:ss');
+          if (targetTime < currentTime) {
+            return error(res, 'Cannot reschedule an appointment to a past time slot today.', 400);
+          }
+        } else if (dayjs(targetDate).isBefore(dayjs(), 'day')) {
+          return error(res, 'Cannot reschedule an appointment to a past date.', 400);
+        }
+      }
+
       await AppointmentModel.update(id, req.body);
       const updated = await AppointmentModel.findById(id);
       return success(res, updated, 'Appointment updated successfully');

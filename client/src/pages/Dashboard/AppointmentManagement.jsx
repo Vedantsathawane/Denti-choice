@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import dayjs from 'dayjs';
 import {
   FaSearch, FaFilter, FaFileCsv, FaFileExcel, FaPrint, FaEdit,
   FaTrash, FaEye, FaCheck, FaTimes, FaUser, FaClock, FaCalendarAlt,
@@ -110,7 +111,17 @@ const AppointmentManagement = () => {
       setEditLoadingSlots(true);
       try {
         const res = await appointmentService.getSlots(editAppt.doctor_id, editAppt.appointment_date);
-        const slots = res.data.data.slots || [];
+        let slots = res.data.data.slots || [];
+        
+        // Disable past slots if rescheduling for today
+        const todayStr = dayjs().format('YYYY-MM-DD');
+        if (editAppt.appointment_date === todayStr) {
+          const currentTime = dayjs().format('HH:mm:ss');
+          slots = slots.map(s => ({
+            ...s,
+            available: s.available && s.time >= currentTime
+          }));
+        }
         setEditSlots(slots);
       } catch (error) {
         toastError('Failed to load doctor slots.', error);

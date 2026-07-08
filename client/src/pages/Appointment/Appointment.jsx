@@ -43,9 +43,26 @@ const Appointment = () => {
     try {
       const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
       const res = await appointmentService.getSlots(watchDoctor, dateStr);
-      setSlots(res.data.data?.slots || []);
+      let fetchedSlots = res.data.data?.slots || [];
+
+      // Disable past slots if booking for today
+      const todayStr = dayjs().format('YYYY-MM-DD');
+      if (dateStr === todayStr) {
+        const currentTime = dayjs().format('HH:mm:ss');
+        fetchedSlots = fetchedSlots.map(s => ({
+          ...s,
+          available: s.available && s.time >= currentTime
+        }));
+      }
+      setSlots(fetchedSlots);
     } catch {
-      setSlots(TIME_SLOTS.map(s => ({ time: s.value, available: true })));
+      const todayStr = dayjs().format('YYYY-MM-DD');
+      const dateStr = dayjs(selectedDate).format('YYYY-MM-DD');
+      const currentTime = dayjs().format('HH:mm:ss');
+      setSlots(TIME_SLOTS.map(s => ({
+        time: s.value,
+        available: dateStr === todayStr ? s.value >= currentTime : true
+      })));
     } finally {
       setLoadingSlots(false);
     }
@@ -228,7 +245,7 @@ const Appointment = () => {
                         onClick={() => setSelectedSlot(slot.time)}
                         className={`py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${
                           !slot.available
-                            ? 'bg-red-50 dark:bg-red-900/20 text-red-400 cursor-not-allowed line-through'
+                            ? 'bg-gray-50/50 dark:bg-gray-900/20 text-gray-300 dark:text-gray-600 border border-gray-100 dark:border-gray-800/50 cursor-not-allowed opacity-40'
                             : selectedSlot === slot.time
                             ? 'gradient-primary text-white shadow-md'
                             : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-primary/10 hover:text-primary border border-gray-200 dark:border-gray-700'

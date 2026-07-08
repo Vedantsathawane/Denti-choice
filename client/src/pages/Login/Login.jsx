@@ -62,7 +62,7 @@ const Login = () => {
                   type="email"
                   {...register('email', { required: 'Email is required' })}
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 outline-none text-sm"
-                  placeholder="admin@dentichoice.com"
+                  placeholder="admin@example.com"
                 />
               </div>
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
@@ -101,16 +101,13 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-gray-150 dark:border-gray-800 flex flex-col items-center gap-4">
+          <div className="mt-6 pt-5 border-t border-gray-200/15 dark:border-white/5 flex flex-col items-center gap-4">
             <button
               onClick={() => navigate('/')}
-              className="w-full py-3 rounded-xl border border-gray-200 dark:border-gray-750 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 rounded-xl border border-gray-200/25 dark:border-white/10 text-gray-600 dark:text-gray-300 font-semibold text-sm hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <FaArrowLeft className="text-xs" /> Back to Home Page
             </button>
-            <p className="text-xs text-gray-400">
-              Default Credentials: admin@dentichoice.com / Admin@123
-            </p>
           </div>
         </div>
       </motion.div>
