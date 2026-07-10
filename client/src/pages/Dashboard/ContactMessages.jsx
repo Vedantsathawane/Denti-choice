@@ -209,8 +209,8 @@ const ContactMessages = () => {
                         </span>
                       )}
                     </div>
-                    <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200 leading-snug">
-                      Subject: <span className="text-gray-600 dark:text-gray-300 font-semibold">{msg.subject || 'No Subject'}</span>
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">
+                      {msg.subject || 'No Subject'}
                     </h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                       {msg.message}
