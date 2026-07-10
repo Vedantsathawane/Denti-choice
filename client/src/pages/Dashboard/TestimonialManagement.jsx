@@ -9,6 +9,7 @@ import { toastError } from '../../services/api';
 import { testimonialService } from '../../services/dataService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { getApiImageUrl } from '../../utils/helpers';
+import { useSocketEvent } from '../../hooks/useSocket';
 
 const TestimonialManagement = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -41,6 +42,10 @@ const TestimonialManagement = () => {
   useEffect(() => {
     fetchTestimonials();
   }, [search]);
+
+  useSocketEvent('testimonials:updated', () => {
+    fetchTestimonials();
+  });
 
   const handleOpenAdd = () => {
     setEditingTestimonial(null);

@@ -100,6 +100,32 @@ const SocketService = {
     } catch (error) {
       logger.error('Socket emit error (doctors:updated)', error);
     }
+  },
+
+  /**
+   * Emit services list updated event
+   */
+  emitServicesUpdated() {
+    try {
+      const io = getIO();
+      io.emit('services:updated');
+      logger.info('Socket: services:updated emitted');
+    } catch (error) {
+      logger.error('Socket emit error (services:updated)', error);
+    }
+  },
+
+  /**
+   * Emit testimonials list updated event
+   */
+  emitTestimonialsUpdated() {
+    try {
+      const io = getIO();
+      io.emit('testimonials:updated');
+      logger.info('Socket: testimonials:updated emitted');
+    } catch (error) {
+      logger.error('Socket emit error (testimonials:updated)', error);
+    }
   }
 };
 

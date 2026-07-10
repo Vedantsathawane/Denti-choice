@@ -1,5 +1,6 @@
 const TestimonialModel = require('../models/testimonialModel');
 const { success, created, error, paginated } = require('../utils/apiResponse');
+const SocketService = require('../services/socketService');
 
 const TestimonialController = {
   async getAll(req, res, next) {
@@ -32,6 +33,7 @@ const TestimonialController = {
       if (req.file) data.patient_photo = `/uploads/${req.file.filename}`;
       const id = await TestimonialModel.create(data);
       const testimonial = await TestimonialModel.findById(id);
+      SocketService.emitTestimonialsUpdated();
       return created(res, testimonial, 'Testimonial created successfully');
     } catch (err) { next(err); }
   },
@@ -45,6 +47,7 @@ const TestimonialController = {
       if (req.file) data.patient_photo = `/uploads/${req.file.filename}`;
       await TestimonialModel.update(id, data);
       const updated = await TestimonialModel.findById(id);
+      SocketService.emitTestimonialsUpdated();
       return success(res, updated, 'Testimonial updated successfully');
     } catch (err) { next(err); }
   },
@@ -54,6 +57,7 @@ const TestimonialController = {
       const id = req.body.id || req.params.id;
       await TestimonialModel.toggleVisibility(id);
       const updated = await TestimonialModel.findById(id);
+      SocketService.emitTestimonialsUpdated();
       return success(res, updated, 'Visibility toggled successfully');
     } catch (err) { next(err); }
   },
@@ -63,6 +67,7 @@ const TestimonialController = {
       const id = req.body.id || req.params.id;
       const deleted = await TestimonialModel.delete(id);
       if (!deleted) return error(res, 'Testimonial not found.', 404);
+      SocketService.emitTestimonialsUpdated();
       return success(res, null, 'Testimonial deleted successfully');
     } catch (err) { next(err); }
   }

@@ -11,6 +11,7 @@ import { toastError } from '../../services/api';
 import { serviceService } from '../../services/dataService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { formatCurrency } from '../../utils/helpers';
+import { useSocketEvent } from '../../hooks/useSocket';
 
 const AVAILABLE_ICONS = {
   FaTooth: { icon: FaTooth, label: 'Tooth (Teeth Cleaning)' },
@@ -56,6 +57,10 @@ const ServiceManagement = () => {
   useEffect(() => {
     fetchServices();
   }, [search]);
+
+  useSocketEvent('services:updated', () => {
+    fetchServices();
+  });
 
   const handleOpenAdd = () => {
     setEditingService(null);

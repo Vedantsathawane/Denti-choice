@@ -1,5 +1,6 @@
 const ServiceModel = require('../models/serviceModel');
 const { success, created, error, paginated } = require('../utils/apiResponse');
+const SocketService = require('../services/socketService');
 
 const ServiceController = {
   async getAll(req, res, next) {
@@ -34,6 +35,7 @@ const ServiceController = {
       if (req.file) data.image = `/uploads/${req.file.filename}`;
       const id = await ServiceModel.create(data);
       const service = await ServiceModel.findById(id);
+      SocketService.emitServicesUpdated();
       return created(res, service, 'Service created successfully');
     } catch (err) { next(err); }
   },
@@ -47,6 +49,7 @@ const ServiceController = {
       if (req.file) data.image = `/uploads/${req.file.filename}`;
       await ServiceModel.update(id, data);
       const updated = await ServiceModel.findById(id);
+      SocketService.emitServicesUpdated();
       return success(res, updated, 'Service updated successfully');
     } catch (err) { next(err); }
   },
@@ -56,6 +59,7 @@ const ServiceController = {
       const id = req.body.id || req.params.id;
       const deleted = await ServiceModel.delete(id);
       if (!deleted) return error(res, 'Service not found.', 404);
+      SocketService.emitServicesUpdated();
       return success(res, null, 'Service deleted successfully');
     } catch (err) { next(err); }
   },

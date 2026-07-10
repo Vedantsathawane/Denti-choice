@@ -69,6 +69,14 @@ const Home = () => {
     doctorService.getAll({ is_active: 1 }).then(r => setDoctors(r.data.data?.slice(0, 3) || [])).catch(() => {});
   });
 
+  useSocketEvent('services:updated', () => {
+    serviceService.getAll({ is_active: 1 }).then(r => setServices(r.data.data?.slice(0, 6) || [])).catch(() => {});
+  });
+
+  useSocketEvent('testimonials:updated', () => {
+    testimonialService.getAll({ is_visible: 1 }).then(r => setTestimonials(r.data.data)).catch(() => {});
+  });
+
   const serviceIcons = { 'Teeth Cleaning': FaTooth, 'Root Canal': FaSyringe, 'Teeth Whitening': FaStar, 'Braces': FaTeethOpen, 'Dental Implant': FaCog, 'Smile Designing': FaSmile, 'Cosmetic Dentistry': FaMagic, 'Tooth Extraction': FaHandHoldingMedical, 'Emergency Dental Care': FaAmbulance, 'Pediatric Dentistry': FaChild };
 
   const faqs = [
