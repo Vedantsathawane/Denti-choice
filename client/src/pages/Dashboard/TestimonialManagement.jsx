@@ -195,7 +195,7 @@ const TestimonialManagement = () => {
                       {[...Array(5)].map((_, i) => (
                         <FaStar
                           key={i}
-                          className={`text-xs ${i < testi.rating ? 'text-amber-400' : 'text-gray-250 dark:text-gray-750'}`}
+                          className={`text-xs ${i < testi.rating ? 'text-amber-400' : 'text-gray-200 dark:text-gray-700'}`}
                         />
                       ))}
                     </div>
