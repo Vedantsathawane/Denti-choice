@@ -354,7 +354,7 @@ const ServiceManagement = () => {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-6 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl bg-gray-lighter hover:bg-gray-lighter-hover text-dark font-semibold text-sm transition-colors duration-200 cursor-pointer"
                   >
                     Cancel
                   </button>

@@ -11,6 +11,7 @@ import { doctorService } from '../../services/dataService';
 import { SPECIALIZATIONS } from '../../utils/constants';
 import { getApiImageUrl } from '../../utils/helpers';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { useSocketEvent } from '../../hooks/useSocket';
 
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -39,6 +40,7 @@ const DoctorManagement = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [removeImage, setRemoveImage] = useState(false);
 
   const fetchDoctors = async () => {
     try {
@@ -55,6 +57,10 @@ const DoctorManagement = () => {
     fetchDoctors();
   }, [search, specialization]);
 
+  useSocketEvent('doctors:updated', () => {
+    fetchDoctors();
+  });
+
   const handleOpenAdd = () => {
     setEditingDoc(null);
     setName('');
@@ -69,6 +75,7 @@ const DoctorManagement = () => {
     setImageFile(null);
     setImagePreview('');
     setIsActive(true);
+    setRemoveImage(false);
     setShowModal(true);
   };
 
@@ -101,6 +108,7 @@ const DoctorManagement = () => {
 
     setImageFile(null);
     setImagePreview(getApiImageUrl(doc.image) || '');
+    setRemoveImage(false);
     setShowModal(true);
   };
 
@@ -108,12 +116,19 @@ const DoctorManagement = () => {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
+      setRemoveImage(false);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview('');
+    setRemoveImage(true);
   };
 
   const handleDayToggle = (day) => {
@@ -142,6 +157,8 @@ const DoctorManagement = () => {
 
     if (imageFile) {
       formData.append('image', imageFile);
+    } else if (removeImage) {
+      formData.append('remove_image', 'true');
     }
 
     try {
@@ -382,6 +399,15 @@ const DoctorManagement = () => {
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Doctor Profile Photo</h4>
                     <p className="text-xs text-gray-500 mt-0.5">Click photo to upload. Suggest square image, max 5MB (JPG, PNG).</p>
+                    {imagePreview && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="mt-2 text-xs text-red-500 hover:text-red-700 font-semibold flex items-center gap-1 cursor-pointer"
+                      >
+                        Remove Photo
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -562,7 +588,7 @@ const DoctorManagement = () => {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-6 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl bg-gray-lighter hover:bg-gray-lighter-hover text-dark font-semibold text-sm transition-colors duration-200 cursor-pointer"
                   >
                     Cancel
                   </button>

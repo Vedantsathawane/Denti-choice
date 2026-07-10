@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { FaUserMd, FaCalendarCheck, FaBriefcase, FaGraduationCap, FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from 'react-icons/fa';
 import { doctorService } from '../../services/dataService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { getApiImageUrl } from '../../utils/helpers';
+import { useSocketEvent } from '../../hooks/useSocket';
 
 const fadeInUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1 } } };
@@ -20,6 +22,12 @@ const Doctors = () => {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useSocketEvent('doctors:updated', () => {
+    doctorService.getAll({ is_active: 1 })
+      .then(r => setDoctors(r.data.data || []))
+      .catch(() => {});
+  });
 
   if (loading) return <LoadingSpinner fullPage />;
 
@@ -54,7 +62,15 @@ const Doctors = () => {
                 >
                   {/* Avatar */}
                   <div className="relative h-56 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center overflow-hidden">
-                    <FaUserMd className="text-8xl text-primary/20" />
+                    {doctor.image ? (
+                      <img
+                        src={getApiImageUrl(doctor.image)}
+                        alt={doctor.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <FaUserMd className="text-8xl text-primary/20" />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
 

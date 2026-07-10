@@ -3,6 +3,8 @@ const app = require('./app');
 const { testConnection } = require('./config/db');
 const { initSocket } = require('./config/socket');
 const { verifyTransporter } = require('./config/mailer');
+const { runMigration } = require('./database/migrate');
+const { startScheduler } = require('./scheduler/reminderScheduler');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 5000;
@@ -16,8 +18,14 @@ const startServer = async () => {
   // Test database connection
   await testConnection();
 
+  // Run database migration for reminder columns
+  await runMigration();
+
   // Verify email transport (non-blocking)
   verifyTransporter();
+
+  // Start appointment reminder background scheduler
+  startScheduler();
 
   server.listen(PORT, () => {
     console.log(`\n🦷 Denti-Choice Server`);

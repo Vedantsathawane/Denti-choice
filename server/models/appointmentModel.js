@@ -7,7 +7,14 @@ const AppointmentModel = {
              p.full_name as patient_name, p.email as patient_email, p.phone as patient_phone,
              p.age as patient_age, p.gender as patient_gender,
              d.name as doctor_name, d.email as doctor_email, d.specialization as doctor_specialization,
-             s.name as service_name, s.price as service_price
+             s.name as service_name, s.price as service_price,
+             CASE
+               WHEN a.reminder_sent = 1 THEN 'Sent'
+               WHEN a.status IN ('completed', 'cancelled') THEN 'Not Required'
+               WHEN CONCAT(a.appointment_date, ' ', a.appointment_time) <= NOW() THEN 'Not Required'
+               WHEN TIMESTAMPDIFF(MINUTE, a.created_at, CONCAT(a.appointment_date, ' ', a.appointment_time)) < 120 THEN 'Not Required'
+               ELSE 'Pending'
+             END as reminder_status
       FROM appointments a
       JOIN patients p ON a.patient_id = p.id
       JOIN doctors d ON a.doctor_id = d.id
@@ -72,7 +79,14 @@ const AppointmentModel = {
              p.full_name as patient_name, p.email as patient_email, p.phone as patient_phone,
              p.age as patient_age, p.gender as patient_gender, p.address as patient_address,
              d.name as doctor_name, d.email as doctor_email, d.phone as doctor_phone, d.specialization as doctor_specialization,
-             s.name as service_name, s.price as service_price, s.duration as service_duration
+             s.name as service_name, s.price as service_price, s.duration as service_duration,
+             CASE
+               WHEN a.reminder_sent = 1 THEN 'Sent'
+               WHEN a.status IN ('completed', 'cancelled') THEN 'Not Required'
+               WHEN CONCAT(a.appointment_date, ' ', a.appointment_time) <= NOW() THEN 'Not Required'
+               WHEN TIMESTAMPDIFF(MINUTE, a.created_at, CONCAT(a.appointment_date, ' ', a.appointment_time)) < 120 THEN 'Not Required'
+               ELSE 'Pending'
+             END as reminder_status
       FROM appointments a
       JOIN patients p ON a.patient_id = p.id
       JOIN doctors d ON a.doctor_id = d.id
@@ -175,7 +189,7 @@ const AppointmentModel = {
   async update(id, data) {
     const fields = [];
     const values = [];
-    const allowedFields = ['doctor_id', 'service_id', 'appointment_date', 'appointment_time', 'message'];
+    const allowedFields = ['doctor_id', 'service_id', 'appointment_date', 'appointment_time', 'message', 'reminder_sent', 'reminder_sent_at'];
     allowedFields.forEach(field => {
       if (data[field] !== undefined) { fields.push(`${field} = ?`); values.push(data[field]); }
     });

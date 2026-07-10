@@ -5,7 +5,12 @@ let io;
 const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      origin: (() => {
+        if (!process.env.CLIENT_URL) return 'http://localhost:5173';
+        return process.env.CLIENT_URL.includes(',')
+          ? process.env.CLIENT_URL.split(',').map(url => url.trim())
+          : process.env.CLIENT_URL;
+      })(),
       methods: ['GET', 'POST'],
       credentials: true
     },

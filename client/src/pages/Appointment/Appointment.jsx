@@ -11,6 +11,7 @@ import { appointmentService, doctorService, serviceService } from '../../service
 import { useSocketEvent } from '../../hooks/useSocket';
 import { TIME_SLOTS, GENDER_OPTIONS } from '../../utils/constants';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { formatTime } from '../../utils/helpers';
 
 const Appointment = () => {
   const [doctors, setDoctors] = useState([]);
@@ -204,14 +205,6 @@ const Appointment = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message (Optional)</label>
                 <textarea {...register('message')} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none text-sm transition resize-none" placeholder="Any specific concerns or notes..." />
               </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-4 rounded-xl gradient-primary text-white font-bold text-lg hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {submitting ? <LoadingSpinner size="sm" /> : <><FaCalendarAlt /> Confirm Booking</>}
-              </button>
             </div>
 
             {/* Right - Calendar & Slots */}
@@ -236,7 +229,7 @@ const Appointment = () => {
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {slots.map((slot) => {
-                    const label = TIME_SLOTS.find(s => s.value === slot.time)?.label || slot.time;
+                    const label = formatTime(slot.time);
                     return (
                       <button
                         type="button"
@@ -261,10 +254,21 @@ const Appointment = () => {
               {selectedSlot && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-primary/10 dark:bg-primary/20 rounded-xl p-4">
                   <p className="text-sm text-primary font-medium">
-                    📅 {dayjs(selectedDate).format('MMMM D, YYYY')} at {TIME_SLOTS.find(s => s.value === selectedSlot)?.label}
+                    📅 {dayjs(selectedDate).format('MMMM D, YYYY')} at {formatTime(selectedSlot)}
                   </p>
                 </motion.div>
               )}
+            </div>
+
+            {/* Confirm Booking Button */}
+            <div className="lg:col-span-3 mt-4">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-4 rounded-xl gradient-primary text-white font-bold text-lg hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {submitting ? <LoadingSpinner size="sm" /> : <><FaCalendarAlt /> Confirm Booking</>}
+              </button>
             </div>
           </form>
         </div>

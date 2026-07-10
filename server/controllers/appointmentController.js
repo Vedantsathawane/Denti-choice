@@ -3,6 +3,7 @@ const AppointmentModel = require('../models/appointmentModel');
 const AppointmentService = require('../services/appointmentService');
 const { success, error, paginated } = require('../utils/apiResponse');
 const { TIME_SLOTS } = require('../utils/helpers');
+const SettingModel = require('../models/settingModel');
 
 const AppointmentController = {
   async getAll(req, res, next) {
@@ -71,7 +72,14 @@ const AppointmentController = {
       const isToday = date === todayStr;
       const currentTime = dayjs().format('HH:mm:ss');
 
-      const availableSlots = TIME_SLOTS.map(slot => ({
+      // Fetch dynamic slots from settings, fallback to helper constants
+      let currentSlots = TIME_SLOTS;
+      const dbSlots = await SettingModel.get('time_slots');
+      if (dbSlots && Array.isArray(dbSlots) && dbSlots.length > 0) {
+        currentSlots = dbSlots;
+      }
+
+      const availableSlots = currentSlots.map(slot => ({
         time: slot,
         available: !bookedSlots.includes(slot) && !(isToday && slot < currentTime)
       }));

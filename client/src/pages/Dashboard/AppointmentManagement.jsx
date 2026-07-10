@@ -4,13 +4,13 @@ import dayjs from 'dayjs';
 import {
   FaSearch, FaFilter, FaFileCsv, FaFileExcel, FaPrint, FaEdit,
   FaTrash, FaEye, FaCheck, FaTimes, FaUser, FaClock, FaCalendarAlt,
-  FaUndo, FaChevronLeft, FaChevronRight
+  FaUndo, FaChevronLeft, FaChevronRight, FaBell
 } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 import { toastError } from '../../services/api';
 import * as XLSX from 'xlsx';
-import { appointmentService, doctorService, serviceService } from '../../services/dataService';
+import { appointmentService, doctorService, serviceService, reminderService } from '../../services/dataService';
 import { formatCurrency, formatTime, formatDate } from '../../utils/helpers';
 import { STATUS_COLORS, TIME_SLOTS } from '../../utils/constants';
 import { useSocket } from '../../hooks/useSocket';
@@ -235,6 +235,58 @@ const AppointmentManagement = () => {
     }
   };
 
+  // Manual Reminder flow
+  const handleSendReminder = async (appt) => {
+    if (appt.reminder_status === 'Sent' || appt.reminder_sent) {
+      Swal.fire({
+        title: 'Reminder Already Sent',
+        text: `A reminder email was already sent for this appointment on ${dayjs(appt.reminder_sent_at).format('MMM D, YYYY h:mm A')}.`,
+        icon: 'warning',
+        confirmButtonColor: '#0077B6'
+      });
+      return;
+    }
+
+    const confirmAction = await Swal.fire({
+      title: 'Send Appointment Reminder?',
+      text: `Are you sure you want to send a reminder email to ${appt.patient_name} now?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#0077B6',
+      cancelButtonColor: '#6B7280',
+      confirmButtonText: 'Yes, send it!'
+    });
+
+    if (!confirmAction.isConfirmed) return;
+
+    const toastId = toast.loading('Sending reminder email...');
+
+    try {
+      await reminderService.sendReminder(appt.id);
+      toast.update(toastId, {
+        render: 'Reminder Sent Successfully!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 3000
+      });
+      fetchAppointments();
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Failed to send reminder.';
+      toast.update(toastId, {
+        render: errorMsg,
+        type: 'error',
+        isLoading: false,
+        autoClose: 3000
+      });
+      Swal.fire({
+        title: 'Reminder Sending Failed',
+        text: errorMsg,
+        icon: 'error',
+        confirmButtonColor: '#EF4444'
+      });
+    }
+  };
+
   // Export functions
   const handleExportCSV = () => {
     const headers = ['ID', 'Patient', 'Email', 'Phone', 'Doctor', 'Service', 'Date', 'Time', 'Status'];
@@ -396,6 +448,8 @@ const AppointmentManagement = () => {
                   <th className="p-4">Service</th>
                   <th className="p-4">Date & Time</th>
                   <th className="p-4">Status</th>
+                  <th className="p-4">Reminder Status</th>
+                  <th className="p-4">Reminder Sent At</th>
                   <th className="p-4 text-right print:hidden">Actions</th>
                 </tr>
               </thead>
@@ -424,6 +478,24 @@ const AppointmentManagement = () => {
                         {appt.status}
                       </span>
                     </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${
+                        appt.status === 'completed' || appt.status === 'cancelled'
+                          ? 'bg-gray-100 text-gray-800 dark:bg-gray-850 dark:text-gray-400'
+                          : appt.reminder_status === 'Sent' 
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                          : appt.reminder_status === 'Pending'
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'
+                      }`}>
+                        {appt.status === 'completed' || appt.status === 'cancelled' ? 'Not Required' : appt.reminder_status}
+                      </span>
+                    </td>
+                    <td className="p-4 text-xs text-gray-500 dark:text-gray-300">
+                      {appt.reminder_sent_at 
+                        ? dayjs(appt.reminder_sent_at).format('YYYY-MM-DD HH:mm') 
+                        : '—'}
+                    </td>
                     <td className="p-4 text-right space-x-1.5 print:hidden shrink-0">
                       {/* Status changes shortcuts */}
                       {appt.status === 'pending' && (
@@ -451,6 +523,21 @@ const AppointmentManagement = () => {
                           title="Cancel Appointment"
                         >
                           <FaTimes className="text-xs" />
+                        </button>
+                      )}
+
+                      {/* Send Reminder */}
+                      {(appt.status === 'pending' || appt.status === 'confirmed') && (
+                        <button
+                          onClick={() => handleSendReminder(appt)}
+                          className={`p-2 rounded-lg hover:scale-105 transition-all cursor-pointer ${
+                            appt.reminder_status === 'Sent' || appt.reminder_sent
+                              ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                              : 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 hover:bg-amber-100'
+                          }`}
+                          title="Send Email Reminder"
+                        >
+                          <FaBell className="text-xs" />
                         </button>
                       )}
 
@@ -565,6 +652,8 @@ const AppointmentManagement = () => {
                     <p><span className="text-gray-500 dark:text-gray-400/80">Price / Duration:</span> <strong>{formatCurrency(selectedAppt.service_price)} / {selectedAppt.service_duration || '30 mins'}</strong></p>
                     <p><span className="text-gray-500 dark:text-gray-400/80">Date:</span> <strong>{formatDate(selectedAppt.appointment_date)}</strong></p>
                     <p><span className="text-gray-500 dark:text-gray-400/80">Time:</span> <strong>{formatTime(selectedAppt.appointment_time)}</strong></p>
+                    <p><span className="text-gray-500 dark:text-gray-400/80">Reminder:</span> <strong>{selectedAppt.status === 'completed' || selectedAppt.status === 'cancelled' ? 'Not Required' : selectedAppt.reminder_status}</strong></p>
+                    <p><span className="text-gray-500 dark:text-gray-400/80">Reminder Sent At:</span> <strong>{selectedAppt.reminder_sent_at ? dayjs(selectedAppt.reminder_sent_at).format('MMM D, YYYY h:mm A') : '—'}</strong></p>
                   </div>
                 </div>
               </div>
@@ -590,7 +679,7 @@ const AppointmentManagement = () => {
               <div className="flex justify-end mt-6">
                 <button
                   onClick={() => setSelectedAppt(null)}
-                  className="px-6 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl bg-gray-lighter hover:bg-gray-lighter-hover text-dark font-semibold text-sm transition-colors duration-200 cursor-pointer"
                 >
                   Close
                 </button>
@@ -686,13 +775,12 @@ const AppointmentManagement = () => {
                     required
                   >
                     <option value="" disabled>-- Select Time Slot --</option>
-                    {TIME_SLOTS.map(slot => {
-                      const isTaken = editSlots.find(s => s.time === slot.value)?.available === false;
+                    {editSlots.map(slot => {
                       // Allow selecting the currently booked slot if it's the one we are editing
-                      const isCurrent = slot.value === editAppt.appointment_time;
+                      const isCurrent = slot.time === editAppt.appointment_time;
                       return (
-                        <option key={slot.value} value={slot.value} disabled={isTaken && !isCurrent}>
-                          {slot.label} {isTaken && !isCurrent ? '(Booked)' : ''}
+                        <option key={slot.time} value={slot.time} disabled={!slot.available && !isCurrent}>
+                          {formatTime(slot.time)} {!slot.available && !isCurrent ? '(Booked)' : ''}
                         </option>
                       );
                     })}
@@ -715,7 +803,7 @@ const AppointmentManagement = () => {
                   <button
                     type="button"
                     onClick={() => setEditAppt(null)}
-                    className="px-5 py-2.5 rounded-xl bg-gray-150 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-200 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl bg-gray-lighter hover:bg-gray-lighter-hover text-dark font-semibold text-sm transition-colors duration-200 cursor-pointer"
                   >
                     Cancel
                   </button>

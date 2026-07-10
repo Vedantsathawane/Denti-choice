@@ -3,15 +3,44 @@ const logger = require('../utils/logger');
 const { formatDate, formatTime } = require('../utils/helpers');
 const SettingModel = require('../models/settingModel');
 
-const BRAND_COLOR = '#0077B6';
-const ACCENT_COLOR = '#00B4D8';
+const BRAND_COLOR = '#0066FF';
+const ACCENT_COLOR = '#00F5D4';
 
-// Inline styles for email clients that strip style tags (like Gmail)
-const btnStyle = `display: inline-block; padding: 12px 30px; background-color: ${BRAND_COLOR}; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 15px 0; text-align: center;`;
-const infoBoxStyle = `background-color: #f0f9ff; border-left: 4px solid ${BRAND_COLOR}; padding: 15px 20px; margin: 15px 0; border-radius: 0 6px 6px 0;`;
-const badgeBase = 'display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;';
-const badgePending = `${badgeBase} background-color: #fff3cd; color: #856404;`;
-const badgeConfirmed = `${badgeBase} background-color: #d4edda; color: #155724;`;
+// Inline styling tokens for premium, responsive HTML email delivery (Vibrant Accent Edition)
+const bodyStyle = 'background-color: #F4F7FC; padding: 40px 10px; font-family: \'Outfit\', \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif; margin: 0;';
+const containerStyle = 'max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; border: 1px solid #D6E4FF; overflow: hidden; box-shadow: 0 15px 30px -5px rgba(0, 102, 255, 0.08), 0 8px 12px -6px rgba(0, 102, 255, 0.04);';
+const bodyContentStyle = 'padding: 40px 30px;';
+const greetingStyle = 'font-size: 20px; font-weight: 700; color: #002266; margin-top: 0; margin-bottom: 8px;';
+const paragraphStyle = 'font-size: 15px; color: #4A5D78; line-height: 1.6; margin-top: 0; margin-bottom: 24px;';
+const sectionTitleStyle = 'font-size: 15px; font-weight: 700; color: #0066FF; margin-top: 32px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #E6F0FF; padding-bottom: 8px;';
+
+const detailsCardStyle = 'background: linear-gradient(180deg, #F0F7FF, #FFFFFF); border: 1px solid #D6E4FF; border-radius: 16px; padding: 24px; margin: 24px 0; box-shadow: 0 4px 15px rgba(0, 102, 255, 0.03);';
+const detailsTableStyle = 'width: 100%; border-collapse: collapse;';
+const detailsRowLabelStyle = 'padding: 12px 0; font-size: 14px; font-weight: 500; color: #4A5D78; text-align: left; border-bottom: 1px solid #E6F0FF; white-space: nowrap;';
+const detailsRowValueStyle = 'padding: 12px 0; font-size: 14px; font-weight: 700; color: #002266; text-align: right; border-bottom: 1px solid #E6F0FF;';
+
+const badgeBase = 'display: inline-block; padding: 6px 14px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;';
+const badgePending = `${badgeBase} background-color: #FFFBEB; color: #D97706; border: 1px solid #FDE68A;`;
+const badgeConfirmed = `${badgeBase} background-color: #ECFDF5; color: #059669; border: 1px solid #A7F3D0;`;
+const badgeCompleted = `${badgeBase} background-color: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE;`;
+const badgeCancelled = `${badgeBase} background-color: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5;`;
+
+const btnStyle = `display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, ${BRAND_COLOR}, #004AD6); color: #ffffff !important; text-decoration: none; border-radius: 9999px; font-weight: 700; font-size: 14px; margin: 16px 0; text-align: center; box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25); letter-spacing: 0.5px;`;
+
+const footerStyle = 'background-color: #F8FAFC; padding: 30px; text-align: center; border-top: 1px solid #E6F0FF;';
+const footerTextStyle = 'color: #7A8FA8; font-size: 12px; margin: 4px 0; line-height: 1.5;';
+
+/**
+ * Format Doctor name safely to prevent "Dr. Dr. Williams"
+ */
+const formatDoctorName = (name) => {
+  if (!name) return '';
+  const trimmed = name.trim();
+  if (/^dr\.?/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `Dr. ${trimmed}`;
+};
 
 /**
  * Base HTML email wrapper
@@ -29,47 +58,35 @@ const emailWrapper = (content, title, settings = {}) => {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7fa; }
-    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
-    .header { background: linear-gradient(135deg, ${BRAND_COLOR}, ${ACCENT_COLOR}); padding: 30px; text-align: center; }
-    .header h1 { color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; }
-    .header p { color: rgba(255,255,255,0.9); margin: 5px 0 0; font-size: 14px; }
-    .body { padding: 30px; }
-    .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; border-top: 1px solid #e9ecef; }
-    .footer p { color: #6c757d; font-size: 12px; margin: 5px 0; }
-    .btn { display: inline-block; padding: 12px 30px; background: ${BRAND_COLOR}; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 15px 0; }
-    .info-box { background: #f0f9ff; border-left: 4px solid ${BRAND_COLOR}; padding: 15px 20px; margin: 15px 0; border-radius: 0 6px 6px 0; }
-    .info-row { display: flex; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
-    .info-label { font-weight: 600; color: #555; min-width: 140px; }
-    .info-value { color: #333; }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-pending { background: #fff3cd; color: #856404; }
-    .badge-confirmed { background: #d4edda; color: #155724; }
-    .badge-completed { background: #d1ecf1; color: #0c5460; }
-    .badge-cancelled { background: #f8d7da; color: #721c24; }
-    h2 { color: #333; font-size: 22px; margin-bottom: 10px; }
-    p { color: #555; line-height: 1.6; }
-    table { width: 100%; border-collapse: collapse; }
-    table td { padding: 10px 0; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
-    table td:first-child { font-weight: 600; color: #555; width: 40%; }
-    table td:last-child { color: #333; }
+    body { margin: 0; padding: 0; font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #F4F7FC; -webkit-font-smoothing: antialiased; }
+    @media only screen and (max-width: 600px) {
+      .container { border-radius: 0 !important; border: none !important; }
+      .content-body { padding: 30px 20px !important; }
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🦷 ${clinicName}</h1>
-      <p>Your Smile, Our Priority</p>
+<body style="${bodyStyle}">
+  <div class="container" style="${containerStyle}">
+    <!-- Colorful Vibrant Header Banner -->
+    <div class="header" style="background: linear-gradient(135deg, ${BRAND_COLOR}, #00D2FF); padding: 40px 30px; text-align: center;">
+      <div style="display: inline-block; padding: 12px; background-color: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; margin-bottom: 12px;">
+        <span style="font-size: 28px; line-height: 1;">🦷</span>
+      </div>
+      <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase;">${clinicName}</h1>
+      <p style="color: rgba(255, 255, 255, 0.85); margin: 6px 0 0; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">Your Smile, Our Priority</p>
     </div>
-    <div class="body">
+    <!-- Body Content -->
+    <div class="content-body" style="${bodyContentStyle}">
       ${content}
     </div>
-    <div class="footer">
-      <p><strong>${clinicName}</strong></p>
-      <p>${clinicAddress}</p>
-      <p>📞 ${clinicPhone} | ✉️ ${clinicEmail}</p>
-      <p style="margin-top: 10px;">© ${new Date().getFullYear()} ${clinicName}. All rights reserved.</p>
+    <!-- Footer -->
+    <div class="footer" style="${footerStyle}">
+      <p style="font-size: 14px; font-weight: 700; color: #002266; margin: 0 0 8px 0;">${clinicName}</p>
+      <p style="${footerTextStyle}">${clinicAddress}</p>
+      <p style="${footerTextStyle}">📞 ${clinicPhone} | ✉️ ${clinicEmail}</p>
+      <p style="${footerTextStyle} margin-top: 16px; font-size: 11px; color: #A5B8CF;">© ${new Date().getFullYear()} ${clinicName}. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -111,27 +128,51 @@ const EmailService = {
     const googleMapsUrl = settings.google_maps_url || 'https://maps.google.com/?q=123+Dental+Avenue+New+York';
 
     const content = `
-      <h2>✅ Appointment Booked Successfully!</h2>
-      <p>Dear <strong>${appointment.patient_name}</strong>,</p>
-      <p>Your appointment has been successfully booked at ${settings.clinic_name || 'Denti-Choice Dental Clinic'}. Here are your appointment details:</p>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: #FFF9E6; border: 1px solid #FFEBA3; color: #D97706; font-size: 24px; margin-bottom: 16px; text-align: center; vertical-align: middle;">⏳</div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #D97706; margin: 0 0 8px 0; letter-spacing: -0.5px;">Booking Received</h2>
+        <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, your request has been logged and is pending confirmation.</p>
+      </div>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>📋 Appointment ID</td><td>#APT-${String(appointment.id).padStart(5, '0')}</td></tr>
-          <tr><td>👨‍⚕️ Doctor</td><td>${appointment.doctor_name}</td></tr>
-          <tr><td>🏥 Service</td><td>${appointment.service_name}</td></tr>
-          <tr><td>📅 Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
-          <tr><td>🕐 Time</td><td>${formatTime(appointment.appointment_time)}</td></tr>
-          <tr><td>📌 Status</td><td><span class="badge badge-pending" style="${badgePending}">Pending</span></td></tr>
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">📋 Appointment ID</td>
+            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
+            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">🏥 Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">📅 Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">🕐 Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none;"><span style="${badgePending}">Pending</span></td>
+          </tr>
         </table>
       </div>
 
-      <p><strong>📍 Clinic Address:</strong> ${clinicAddress}</p>
-      ${googleMapsUrl ? `<a href="${googleMapsUrl}" target="_blank" style="${btnStyle}">📍 View on Google Maps</a>` : ''}
-      <p><strong>📞 Contact:</strong> ${clinicPhone}</p>
+      <div style="text-align: center; margin: 30px 0 10px 0;">
+        ${googleMapsUrl ? `<a href="${googleMapsUrl}" target="_blank" style="${btnStyle}">📍 View on Google Maps</a>` : ''}
+      </div>
       
-      <p>Your appointment is currently <strong>pending confirmation</strong>. You will receive another email once it has been confirmed by our team.</p>
-      <p>Thank you for choosing ${settings.clinic_name || 'Denti-Choice'}! 😊</p>
+      <div style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid ${BRAND_COLOR}; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78; margin-top: 25px;">
+        <p style="margin: 0 0 8px 0; color: #002266;"><strong>📍 Location:</strong> ${clinicAddress}</p>
+        <p style="margin: 0; color: #002266;"><strong>📞 Contact:</strong> ${clinicPhone}</p>
+      </div>
+
+      <p style="${paragraphStyle} margin-top: 25px;">We will send you another email once your slot is confirmed. Thank you! 😊</p>
     `;
     return this.send(appointment.patient_email, `Appointment Booked - ${settings.clinic_name || 'Denti-Choice'}`, emailWrapper(content, 'Appointment Booked', settings), settings);
   },
@@ -142,23 +183,45 @@ const EmailService = {
   async sendAdminNotification(appointment) {
     const settings = await SettingModel.getAll();
     const content = `
-      <h2>🔔 New Appointment Booked</h2>
-      <p>A new appointment has been booked at ${settings.clinic_name || 'Denti-Choice'}.</p>
+      <h2 style="${greetingStyle}">🔔 New Appointment Booked</h2>
+      <p style="${paragraphStyle}">A new appointment request has been submitted. Please review and manage it in the admin dashboard.</p>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>Patient</td><td>${appointment.patient_name}</td></tr>
-          <tr><td>Email</td><td>${appointment.patient_email}</td></tr>
-          <tr><td>Phone</td><td>${appointment.patient_phone}</td></tr>
-          <tr><td>Doctor</td><td>${appointment.doctor_name}</td></tr>
-          <tr><td>Service</td><td>${appointment.service_name}</td></tr>
-          <tr><td>Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
-          <tr><td>Time</td><td>${formatTime(appointment.appointment_time)}</td></tr>
-          ${appointment.message ? `<tr><td>Message</td><td>${appointment.message}</td></tr>` : ''}
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">Patient</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Email</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Phone</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Doctor</td>
+            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">Message</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+          </tr>
         </table>
       </div>
-
-      <p>Please review and confirm this appointment from the admin dashboard.</p>
     `;
     const adminEmail = settings.clinic_email || process.env.SMTP_USER || 'admin@dentichoice.com';
     return this.send(adminEmail, `New Appointment Booked - ${settings.clinic_name || 'Denti-Choice'} Admin`, emailWrapper(content, 'New Appointment', settings), settings);
@@ -170,20 +233,44 @@ const EmailService = {
   async sendDoctorNewPatient(appointment) {
     const settings = await SettingModel.getAll();
     const content = `
-      <h2>👤 New Patient Appointment</h2>
-      <p>Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
-      <p>A new appointment has been scheduled with you:</p>
+      <h2 style="${greetingStyle}">👤 New Appointment Scheduled</h2>
+      <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
+      <p style="${paragraphStyle}">A new patient appointment has been scheduled with you:</p>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>Appointment ID</td><td>#APT-${String(appointment.id).padStart(5, '0')}</td></tr>
-          <tr><td>Patient Name</td><td>${appointment.patient_name}</td></tr>
-          <tr><td>Phone</td><td>${appointment.patient_phone}</td></tr>
-          <tr><td>Email</td><td>${appointment.patient_email}</td></tr>
-          <tr><td>Service</td><td>${appointment.service_name}</td></tr>
-          <tr><td>Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
-          <tr><td>Time</td><td>${formatTime(appointment.appointment_time)}</td></tr>
-          ${appointment.message ? `<tr><td>Notes</td><td>${appointment.message}</td></tr>` : ''}
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Patient Name</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Phone</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Email</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+          </tr>
         </table>
       </div>
     `;
@@ -201,53 +288,112 @@ const EmailService = {
 
     // Email to patient
     const patientContent = `
-      <h2>✅ Appointment Confirmed!</h2>
-      <p>Dear <strong>${appointment.patient_name}</strong>,</p>
-      <p>Great news! Your appointment has been <strong>confirmed</strong>.</p>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: #ECFDF5; border: 1px solid #A7F3D0; color: #059669; font-size: 24px; margin-bottom: 16px; text-align: center; vertical-align: middle;">✓</div>
+        <h2 style="font-size: 22px; font-weight: 800; color: ${BRAND_COLOR}; margin: 0 0 8px 0; letter-spacing: -0.5px;">Appointment Confirmed</h2>
+        <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, great news! Your slot is officially locked in.</p>
+      </div>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>📋 Appointment ID</td><td>#APT-${String(appointment.id).padStart(5, '0')}</td></tr>
-          <tr><td>👨‍⚕️ Doctor</td><td>${appointment.doctor_name}</td></tr>
-          <tr><td>🏥 Service</td><td>${appointment.service_name}</td></tr>
-          <tr><td>📅 Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
-          <tr><td>🕐 Time</td><td>${formatTime(appointment.appointment_time)}</td></tr>
-          <tr><td>📌 Status</td><td><span class="badge badge-confirmed" style="${badgeConfirmed}">Confirmed</span></td></tr>
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">📋 Appointment ID</td>
+            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
+            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">🏥 Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">📅 Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">🕐 Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none;"><span style="${badgeConfirmed}">Confirmed</span></td>
+          </tr>
         </table>
       </div>
 
-      <p><strong>📍 Location:</strong> ${clinicAddress}</p>
-      ${googleMapsUrl ? `<a href="${googleMapsUrl}" target="_blank" style="${btnStyle}">📍 View on Google Maps</a>` : ''}
+      <div style="text-align: center; margin: 30px 0 10px 0;">
+        ${googleMapsUrl ? `<a href="${googleMapsUrl}" target="_blank" style="${btnStyle}">📍 View on Google Maps</a>` : ''}
+      </div>
 
-      <h3>📋 Before Your Visit:</h3>
-      <ul>
-        <li>Please arrive 15 minutes before your scheduled time</li>
-        <li>Bring your ID and insurance card (if applicable)</li>
-        <li>List any medications you are currently taking</li>
-        <li>Avoid eating 2 hours before the appointment (for certain procedures)</li>
-      </ul>
+      <h3 style="${sectionTitleStyle}">📋 Before Your Visit:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+        <tr>
+          <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #10B981; vertical-align: top;">✓</td>
+          <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">Please arrive 15 minutes before your scheduled time.</td>
+        </tr>
+        <tr>
+          <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #10B981; vertical-align: top;">✓</td>
+          <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">Bring your ID and insurance card (if applicable).</td>
+        </tr>
+        <tr>
+          <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #10B981; vertical-align: top;">✓</td>
+          <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">List any medications you are currently taking.</td>
+        </tr>
+        <tr>
+          <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #10B981; vertical-align: top;">✓</td>
+          <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">Avoid eating 2 hours before the appointment (for certain procedures).</td>
+        </tr>
+      </table>
       
-      <p><strong>📞 Contact:</strong> ${clinicPhone}</p>
-      <p>We look forward to seeing you! 😊</p>
+      <div style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid #0066FF; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
+        <p style="margin: 0 0 8px 0; color: #002266;"><strong>📍 Location:</strong> ${clinicAddress}</p>
+        <p style="margin: 0; color: #002266;"><strong>📞 Contact:</strong> ${clinicPhone}</p>
+      </div>
     `;
     await this.send(appointment.patient_email, `Appointment Confirmed - ${settings.clinic_name || 'Denti-Choice'}`, emailWrapper(patientContent, 'Appointment Confirmed', settings), settings);
 
     // Email to doctor
     const doctorContent = `
-      <h2>📅 Appointment Confirmed</h2>
-      <p>Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
-      <p>The following appointment has been confirmed:</p>
+      <h2 style="${greetingStyle}">📅 Appointment Confirmed</h2>
+      <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
+      <p style="${paragraphStyle}">The following appointment has been confirmed and scheduled in your calendar:</p>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>Appointment ID</td><td>#APT-${String(appointment.id).padStart(5, '0')}</td></tr>
-          <tr><td>Patient</td><td>${appointment.patient_name}</td></tr>
-          <tr><td>Phone</td><td>${appointment.patient_phone}</td></tr>
-          <tr><td>Email</td><td>${appointment.patient_email}</td></tr>
-          <tr><td>Service</td><td>${appointment.service_name}</td></tr>
-          <tr><td>Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
-          <tr><td>Time</td><td>${formatTime(appointment.appointment_time)}</td></tr>
-          ${appointment.message ? `<tr><td>Notes</td><td>${appointment.message}</td></tr>` : ''}
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Patient</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Phone</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Email</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+          </tr>
         </table>
       </div>
     `;
@@ -262,37 +408,72 @@ const EmailService = {
     const clinicPhone = settings.clinic_phone || '+1 (555) 123-4567';
 
     const patientContent = `
-      <h2>❌ Appointment Cancelled</h2>
-      <p>Dear <strong>${appointment.patient_name}</strong>,</p>
-      <p>We regret to inform you that your appointment has been <strong>cancelled</strong>.</p>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: #FEF2F2; border: 1px solid #FCA5A5; color: #DC2626; font-size: 24px; margin-bottom: 16px; text-align: center; vertical-align: middle;">✕</div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #DC2626; margin: 0 0 8px 0; letter-spacing: -0.5px;">Appointment Cancelled</h2>
+        <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, your appointment has been cancelled.</p>
+      </div>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>Appointment ID</td><td>#APT-${String(appointment.id).padStart(5, '0')}</td></tr>
-          <tr><td>Doctor</td><td>${appointment.doctor_name}</td></tr>
-          <tr><td>Service</td><td>${appointment.service_name}</td></tr>
-          <tr><td>Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
-          <tr><td>Time</td><td>${formatTime(appointment.appointment_time)}</td></tr>
-          ${appointment.cancellation_reason ? `<tr><td>Reason</td><td>${appointment.cancellation_reason}</td></tr>` : ''}
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Doctor</td>
+            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none; color: #DC2626;">Reason</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none; color: #DC2626;">"${appointment.cancellation_reason || 'No reason provided'}"</td>
+          </tr>
         </table>
       </div>
 
-      <p>If you would like to reschedule, please book a new appointment or contact us.</p>
-      <p><strong>📞 Contact:</strong> ${clinicPhone}</p>
+      <p style="${paragraphStyle}">If you would like to reschedule, please visit our website or contact our clinic.</p>
+      
+      <div style="background-color: #FEF2F2; border: 1px solid #FCA5A5; border-left: 4px solid #DC2626; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
+        <p style="margin: 0; color: #DC2626;"><strong>📞 Contact:</strong> ${clinicPhone}</p>
+      </div>
     `;
     await this.send(appointment.patient_email, `Appointment Cancelled - ${settings.clinic_name || 'Denti-Choice'}`, emailWrapper(patientContent, 'Appointment Cancelled', settings), settings);
 
     const doctorContent = `
-      <h2>❌ Appointment Cancelled</h2>
-      <p>Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
-      <p>The following appointment has been cancelled:</p>
+      <h2 style="${greetingStyle}; color: #DC2626;">❌ Appointment Cancelled</h2>
+      <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
+      <p style="${paragraphStyle}">The following appointment has been cancelled:</p>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>Patient</td><td>${appointment.patient_name}</td></tr>
-          <tr><td>Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
-          <tr><td>Time</td><td>${formatTime(appointment.appointment_time)}</td></tr>
-          ${appointment.cancellation_reason ? `<tr><td>Reason</td><td>${appointment.cancellation_reason}</td></tr>` : ''}
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">Patient</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none; color: #DC2626;">Reason</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none; color: #DC2626;">"${appointment.cancellation_reason || 'No reason provided'}"</td>
+          </tr>
         </table>
       </div>
     `;
@@ -305,22 +486,31 @@ const EmailService = {
   async sendAppointmentCompleted(appointment) {
     const settings = await SettingModel.getAll();
     const content = `
-      <h2>🎉 Thank You for Visiting!</h2>
-      <p>Dear <strong>${appointment.patient_name}</strong>,</p>
-      <p>Thank you for visiting ${settings.clinic_name || 'Denti-Choice Dental Clinic'}! We hope your experience was wonderful.</p>
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: #EFF6FF; border: 1px solid #BFDBFE; color: #0066FF; font-size: 24px; margin-bottom: 16px; text-align: center; vertical-align: middle;">🎉</div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #0066FF; margin: 0 0 8px 0; letter-spacing: -0.5px;">Thank You for Visiting!</h2>
+        <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, thank you for choosing our clinic for your dental care.</p>
+      </div>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <table>
-          <tr><td>Doctor</td><td>${appointment.doctor_name}</td></tr>
-          <tr><td>Service</td><td>${appointment.service_name}</td></tr>
-          <tr><td>Date</td><td>${formatDate(appointment.appointment_date)}</td></tr>
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">Doctor</td>
+            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">Date</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none;">${formatDate(appointment.appointment_date)}</td>
+          </tr>
         </table>
       </div>
 
-      <p>We would love to hear about your experience! Your feedback helps us improve our services and helps other patients make informed decisions.</p>
-      
-      <p>Thank you for trusting ${settings.clinic_name || 'Denti-Choice'} with your dental care. We look forward to seeing you again! 😊</p>
-      <p>Best regards,<br>The ${settings.clinic_name || 'Denti-Choice'} Team</p>
+      <p style="${paragraphStyle}">Your feedback helps us continue providing excellent services. We look forward to seeing you again for your next dental checkup!</p>
+      <p style="${paragraphStyle}">Best regards,<br>The ${settings.clinic_name || 'Denti-Choice'} Team</p>
     `;
     return this.send(appointment.patient_email, `Thank You for Your Visit - ${settings.clinic_name || 'Denti-Choice'}`, emailWrapper(content, 'Thank You', settings), settings);
   },
@@ -332,24 +522,149 @@ const EmailService = {
     const settings = await SettingModel.getAll();
     const clinicPhone = settings.clinic_phone || '+1 (555) 123-4567';
     const content = `
-      <h2>📩 Reply to Your Inquiry</h2>
-      <p>Dear <strong>${contact.name}</strong>,</p>
-      <p>Thank you for reaching out to ${settings.clinic_name || 'Denti-Choice'}. Here is our response to your inquiry:</p>
+      <h2 style="${greetingStyle}">📩 Response to Your Inquiry</h2>
+      <p style="${paragraphStyle}">Dear <strong>${contact.name}</strong>,</p>
+      <p style="${paragraphStyle}">Thank you for reaching out. Here is our response to your question:</p>
       
-      <div class="info-box" style="${infoBoxStyle}">
-        <p><strong>Your Message:</strong></p>
-        <p>${contact.message}</p>
+      <div style="${detailsCardStyle}">
+        <p style="font-size: 14px; font-weight: 700; color: #002266; margin: 0 0 6px 0;">Your Inquiry:</p>
+        <p style="font-size: 14px; color: #4A5D78; margin: 0 0 16px 0; font-style: italic; line-height: 1.5;">"${contact.message}"</p>
+        
+        <p style="font-size: 14px; font-weight: 700; color: ${BRAND_COLOR}; margin: 0 0 6px 0; border-top: 1px solid #E6F0FF; padding-top: 16px;">Our Reply:</p>
+        <p style="font-size: 14px; color: #002266; margin: 0; line-height: 1.5; font-weight: 500;">${replyMessage}</p>
       </div>
 
-      <div class="info-box" style="${infoBoxStyle} border-left-color: ${ACCENT_COLOR};">
-        <p><strong>Our Response:</strong></p>
-        <p>${replyMessage}</p>
-      </div>
-
-      <p>If you have any further questions, feel free to reply to this email or call us at ${clinicPhone}.</p>
-      <p>Best regards,<br>The ${settings.clinic_name || 'Denti-Choice'} Team</p>
+      <p style="${paragraphStyle}">If you have any further questions, feel free to reply directly to this email or call us at <strong>${clinicPhone}</strong>.</p>
     `;
     return this.send(contact.email, `Re: Your Inquiry - ${settings.clinic_name || 'Denti-Choice'}`, emailWrapper(content, 'Contact Reply', settings), settings);
+  },
+
+  /**
+   * Send appointment reminder to patient
+   */
+  async sendAppointmentReminder(appointment) {
+    const settings = await SettingModel.getAll();
+    const clinicAddress = settings.clinic_address || '123 Dental Avenue, Healthcare District, New York, NY 10001';
+    const clinicPhone = settings.clinic_phone || '+1 (555) 123-4567';
+    const googleMapsUrl = settings.google_maps_url || 'https://maps.google.com/?q=123+Dental+Avenue+New+York';
+    const clinicEmail = settings.clinic_email || 'info@dentichoice.com';
+    const clinicName = settings.clinic_name || 'Denti-Choice Dental Clinic';
+
+    const isToday = require('dayjs')(appointment.appointment_date).isSame(require('dayjs')(), 'day');
+    const subject = `Reminder: Your Appointment at ${clinicName} ${isToday ? 'Today' : 'Tomorrow'}`;
+
+    const content = `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: #EFF6FF; border: 1px solid #BFDBFE; color: #0066FF; font-size: 24px; margin-bottom: 16px; text-align: center; vertical-align: middle;">⏰</div>
+        <h2 style="font-size: 22px; font-weight: 800; color: #0066FF; margin: 0 0 8px 0; letter-spacing: -0.5px;">Appointment Reminder</h2>
+        <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, this is a friendly reminder of your upcoming slot:</p>
+      </div>
+      
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">📋 Appointment ID</td>
+            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
+            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">🏥 Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">📅 Date</td>
+            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">🕐 Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none;"><span style="${badgeConfirmed}">Confirmed</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0 10px 0;">
+        ${googleMapsUrl ? `<a href="${googleMapsUrl}" target="_blank" style="${btnStyle}">📍 View on Google Maps</a>` : ''}
+      </div>
+
+      <h3 style="${sectionTitleStyle}">📋 Preparation Instructions:</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+        <tr>
+          <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #0066FF; vertical-align: top;">✓</td>
+          <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">Please arrive 10–15 minutes early to complete check-in.</td>
+        </tr>
+        <tr>
+          <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #0066FF; vertical-align: top;">✓</td>
+          <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">Bring any previous reports, X-rays, or relevant medical records.</td>
+        </tr>
+        <tr>
+          <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #0066FF; vertical-align: top;">✓</td>
+          <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">If you need to cancel or reschedule, please notify us 24h in advance.</td>
+        </tr>
+      </table>
+
+      <div style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid #0066FF; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
+        <p style="margin: 0 0 8px 0; color: #002266;"><strong>📍 Location:</strong> ${clinicAddress}</p>
+        <p style="margin: 0; color: #002266;"><strong>📞 Contact:</strong> ${clinicPhone} | ✉️ ${clinicEmail}</p>
+      </div>
+    `;
+    return this.send(appointment.patient_email, subject, emailWrapper(content, 'Appointment Reminder', settings), settings);
+  },
+
+  /**
+   * Send appointment reminder to doctor
+   */
+  async sendDoctorReminder(appointment) {
+    const settings = await SettingModel.getAll();
+    const clinicName = settings.clinic_name || 'Denti-Choice';
+    const isToday = require('dayjs')(appointment.appointment_date).isSame(require('dayjs')(), 'day');
+    const subject = `Appointment Reminder: Patient ${appointment.patient_name} - ${isToday ? 'Today' : 'Tomorrow'}`;
+
+    const content = `
+      <h2 style="${greetingStyle}">👨‍⚕️ Patient Appointment Reminder</h2>
+      <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
+      <p style="${paragraphStyle}">This is a reminder that you have an upcoming appointment scheduled with the following patient:</p>
+      
+      <div style="${detailsCardStyle}">
+        <table style="${detailsTableStyle}">
+          <tr>
+            <td style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Patient Name</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Phone</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Email</td>
+            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Service</td>
+            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}">Time</td>
+            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+          </tr>
+          <tr>
+            <td style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
+            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+          </tr>
+        </table>
+      </div>
+    `;
+    return this.send(appointment.doctor_email, subject, emailWrapper(content, 'Doctor Appointment Reminder', settings), settings);
   }
 };
 

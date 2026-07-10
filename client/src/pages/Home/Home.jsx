@@ -14,6 +14,8 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { testimonialService, doctorService, serviceService } from '../../services/dataService';
 import { useSettings } from '../../hooks/useSettings';
+import { getApiImageUrl } from '../../utils/helpers';
+import { useSocketEvent } from '../../hooks/useSocket';
 
 // Animation variants
 const fadeInUp = {
@@ -63,6 +65,10 @@ const Home = () => {
     serviceService.getAll({ is_active: 1 }).then(r => setServices(r.data.data?.slice(0, 6) || [])).catch(() => {});
   }, []);
 
+  useSocketEvent('doctors:updated', () => {
+    doctorService.getAll({ is_active: 1 }).then(r => setDoctors(r.data.data?.slice(0, 3) || [])).catch(() => {});
+  });
+
   const serviceIcons = { 'Teeth Cleaning': FaTooth, 'Root Canal': FaSyringe, 'Teeth Whitening': FaStar, 'Braces': FaTeethOpen, 'Dental Implant': FaCog, 'Smile Designing': FaSmile, 'Cosmetic Dentistry': FaMagic, 'Tooth Extraction': FaHandHoldingMedical, 'Emergency Dental Care': FaAmbulance, 'Pediatric Dentistry': FaChild };
 
   const faqs = [
@@ -93,8 +99,8 @@ const Home = () => {
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl" />
         </div>
 
-        <div className="container-custom relative z-10 py-32 lg:py-0">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container-custom relative z-10 py-24 sm:py-32 lg:py-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -109,7 +115,7 @@ const Home = () => {
                 🦷 Welcome to Denti-Choice Dental Clinic
               </motion.span>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
                 Your Smile
                 <br />
                 <span className="text-accent">Deserves the Best</span>
@@ -117,7 +123,7 @@ const Home = () => {
                 Dental Care
               </h1>
 
-              <p className="text-lg text-white/80 mb-8 max-w-lg">
+              <p className="text-base sm:text-lg text-white/80 mb-8 max-w-lg">
                 Experience world-class dental care with our team of expert specialists.
                 Modern technology, gentle care, and beautiful results — all under one roof.
               </p>
@@ -140,7 +146,7 @@ const Home = () => {
               </div>
 
               {/* Quick stats */}
-              <div className="flex gap-8 mt-12">
+              <div className="flex flex-wrap gap-6 md:gap-8 mt-12">
                 {[
                   { val: '15+', label: 'Years Experience' },
                   { val: '10K+', label: 'Happy Patients' },
@@ -208,7 +214,7 @@ const Home = () => {
       {/* ==================== STATS SECTION ==================== */}
       <section className="py-16 bg-gray-900 relative -mt-1">
         <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             <Counter end={15} label="Years of Experience" icon={FaAward} suffix="+" />
             <Counter end={10000} label="Happy Patients" icon={FaSmile} suffix="+" />
             <Counter end={6} label="Expert Doctors" icon={FaUserMd} />
@@ -226,7 +232,7 @@ const Home = () => {
             <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">We provide comprehensive dental care services using the latest technology and techniques to ensure your comfort and satisfaction.</p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, idx) => {
               const Icon = serviceIcons[service.name] || FaTooth;
               return (
@@ -267,7 +273,7 @@ const Home = () => {
             <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">We are committed to providing the highest quality dental care in a comfortable and welcoming environment.</p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {whyChooseUs.map(({ icon: Icon, title, desc }, idx) => (
               <motion.div key={idx} variants={fadeInUp} className="flex gap-4 p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-card transition-all">
                 <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0">
@@ -291,11 +297,19 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900 dark:text-white">Expert Dental Specialists</h2>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid md:grid-cols-3 gap-8">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {doctors.map((doctor, idx) => (
               <motion.div key={doctor.id || idx} variants={fadeInUp} whileHover={{ y: -5 }} className="group text-center">
                 <div className="relative mb-5 mx-auto w-48 h-48 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <FaUserMd className="text-6xl text-primary/40" />
+                  {doctor.image ? (
+                    <img
+                      src={getApiImageUrl(doctor.image)}
+                      alt={doctor.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <FaUserMd className="text-6xl text-primary/40" />
+                  )}
                   <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors rounded-full" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">{doctor.name}</h3>
@@ -317,7 +331,7 @@ const Home = () => {
       {/* ==================== ABOUT CLINIC ==================== */}
       <section id="about" className="section-padding bg-gray-50 dark:bg-gray-900">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <span className="text-primary font-semibold text-sm uppercase tracking-wider">About Us</span>
               <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-6 text-gray-900 dark:text-white">
@@ -333,7 +347,7 @@ const Home = () => {
                 to deliver exceptional results. From routine check-ups to complex procedures, we provide
                 comprehensive care tailored to your individual needs.
               </p>
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
                 {[
                   { icon: FaShieldAlt, text: '100% Safe Procedures' },
                   { icon: FaClock, text: 'On-Time Appointments' },
@@ -352,10 +366,10 @@ const Home = () => {
 
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <div className="relative">
-                <div className="w-full h-96 rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+                <div className="w-full h-64 sm:h-96 rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
                   <FaTooth className="text-[120px] text-primary/20" />
                 </div>
-                <div className="absolute -bottom-6 -left-6 bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
+                <div className="absolute -bottom-6 left-4 sm:-left-6 bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
                   <div className="text-3xl font-bold gradient-text">15+</div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Years of Excellence</p>
                 </div>
@@ -500,13 +514,13 @@ const Home = () => {
             <FaEnvelope className="text-4xl text-primary mx-auto mb-4" />
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">Stay Updated</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-6">Subscribe to our newsletter for dental tips, clinic updates, and special offers.</p>
-            <form className="flex gap-3 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
+            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                className="w-full sm:flex-1 px-5 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
               />
-              <button className="px-6 py-3 rounded-xl gradient-primary text-white font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all flex items-center gap-2">
+              <button className="w-full sm:w-auto px-6 py-3 rounded-xl gradient-primary text-white font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <FaPaperPlane /> Subscribe
               </button>
             </form>

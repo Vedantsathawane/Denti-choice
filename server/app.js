@@ -18,6 +18,7 @@ const contactRoutes = require('./routes/contactRoutes');
 const settingRoutes = require('./routes/settingRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const reminderRoutes = require('./routes/reminderRoutes');
 
 // Import middleware
 const { errorHandler, notFound } = require('./middlewares/errorMiddleware');
@@ -89,6 +90,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reminders', reminderRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

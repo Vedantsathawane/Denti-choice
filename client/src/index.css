@@ -27,6 +27,7 @@
   --color-gray: #71717A;
   --color-gray-light: #A1A1AA;
   --color-gray-lighter: #E4E4E7;
+  --color-gray-lighter-hover: #D4D4D8;
   --color-light: #FAF9F6;
   --color-white: #FFFFFF;
 
@@ -98,6 +99,7 @@
   --color-white: #FFFFFF;         /* White remains white to support text-white compatibility */
   --color-light: #151E2E;         /* Premium Slate card color */
   --color-gray-lighter: #1F293D;  /* Dark border color */
+  --color-gray-lighter-hover: #2E3B52;
   --color-glass: rgba(11, 15, 25, 0.75);
   --color-glass-border: rgba(31, 41, 61, 0.4);
 
@@ -498,4 +500,35 @@ select:focus {
 .dark ::placeholder {
   color: #9ca3af !important; /* gray-400 in dark mode */
   opacity: 1 !important;
+}
+
+/* Global Browser Autofill CSS Overrides (Light Mode & Dark Mode) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #F9FAFB inset !important; /* Matches bg-gray-50 background */
+  -webkit-text-fill-color: #111827 !important; /* Matches text-gray-900 color */
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover, 
+.dark input:-webkit-autofill:focus, 
+.dark input:-webkit-autofill:active,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #1F2937 inset !important; /* Matches dark:bg-gray-800 background */
+  -webkit-text-fill-color: #FFFFFF !important; /* Matches dark:text-white color */
+  transition: background-color 5000s ease-in-out 0s;
 }

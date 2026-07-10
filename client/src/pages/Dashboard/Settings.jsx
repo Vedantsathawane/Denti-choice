@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaSave, FaClinicMedical, FaClock, FaMailBulk, FaGlobe } from 'react-icons/fa';
+import { FaSave, FaClinicMedical, FaClock, FaMailBulk, FaGlobe, FaTimes } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import dayjs from 'dayjs';
 import { toastError } from '../../services/api';
 import { settingService } from '../../services/dataService';
 import { useSettings } from '../../hooks/useSettings';
@@ -36,6 +37,10 @@ const Settings = () => {
   const [smtpUser, setSmtpUser] = useState('');
   const [smtpPass, setSmtpPass] = useState('');
 
+  // Time Slots state
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [newSlotTime, setNewSlotTime] = useState('09:00');
+
   const fetchSettings = async () => {
     try {
       const res = await settingService.getAll();
@@ -59,6 +64,17 @@ const Settings = () => {
       setSmtpPort(s.smtp_port || '');
       setSmtpUser(s.smtp_user || '');
       setSmtpPass(s.smtp_pass || '');
+
+      // Fallback default slots if not set in DB
+      const defaultSlots = [
+        '09:00:00', '09:30:00', '10:00:00', '10:30:00',
+        '11:00:00', '11:30:00', '12:00:00',
+        '14:00:00', '14:30:00', '15:00:00', '15:30:00',
+        '16:00:00', '16:30:00', '17:00:00', '17:30:00',
+        '18:00:00', '18:30:00', '19:00:00', '19:30:00',
+        '20:00:00', '20:30:00', '21:00:00', '21:30:00'
+      ];
+      setTimeSlots(s.time_slots && Array.isArray(s.time_slots) && s.time_slots.length > 0 ? s.time_slots : defaultSlots);
     } catch (error) {
       toastError('Failed to load settings.', error);
     } finally {
@@ -72,6 +88,22 @@ const Settings = () => {
 
   const handleOpeningHoursChange = (day, value) => {
     setOpeningHours(prev => ({ ...prev, [day]: value }));
+  };
+
+  const addTimeSlot = () => {
+    if (!newSlotTime) return;
+    const formattedTime = newSlotTime.split(':').length === 2 ? `${newSlotTime}:00` : newSlotTime;
+    if (timeSlots.includes(formattedTime)) {
+      toast.warning('This time slot already exists.');
+      return;
+    }
+    setTimeSlots(prev => [...prev, formattedTime].sort((a, b) => a.localeCompare(b)));
+    toast.success(`Time slot added. Click "Save Changes" to save.`);
+  };
+
+  const removeTimeSlot = (slotToRemove) => {
+    setTimeSlots(prev => prev.filter(s => s !== slotToRemove));
+    toast.info('Time slot removed. Click "Save Changes" to save.');
   };
 
   const handleSubmit = async (e) => {
@@ -92,7 +124,8 @@ const Settings = () => {
       smtp_host: smtpHost,
       smtp_port: smtpPort,
       smtp_user: smtpUser,
-      smtp_pass: smtpPass
+      smtp_pass: smtpPass,
+      time_slots: timeSlots
     };
 
     try {
@@ -146,6 +179,17 @@ const Settings = () => {
             }`}
           >
             <FaMailBulk /> SMTP Config
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('slots')}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-left transition-all cursor-pointer whitespace-nowrap lg:w-full ${
+              activeTab === 'slots'
+                ? 'gradient-primary text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <FaClock /> Available Time Slots
           </button>
         </div>
 
@@ -358,6 +402,71 @@ const Settings = () => {
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
                     />
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'slots' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-50 dark:border-gray-800 pb-2">
+                    Manage Available Time Slots
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Add or remove the appointment time slots available for patient bookings. Be sure to click "Save Changes" below when finished.
+                  </p>
+                </div>
+
+                {/* Add Time Slot Form */}
+                <div className="bg-gray-50 dark:bg-gray-950 p-4 border border-gray-150 dark:border-gray-800 rounded-2xl flex flex-wrap items-end gap-4 animate-fadeIn">
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Select Time to Add</label>
+                    <input
+                      type="time"
+                      value={newSlotTime}
+                      onChange={e => setNewSlotTime(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addTimeSlot}
+                    className="px-6 py-2.5 rounded-xl gradient-primary text-white font-semibold text-sm hover:shadow-md cursor-pointer transition-all h-[42px]"
+                  >
+                    Add Slot
+                  </button>
+                </div>
+
+                {/* Current Time Slots List */}
+                <div className="space-y-3">
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Active Booking Slots ({timeSlots.length})</label>
+                  
+                  {timeSlots.length === 0 ? (
+                    <p className="text-sm text-gray-400 dark:text-gray-500 italic py-4 text-center">No active time slots. Add a slot above to get started.</p>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      {timeSlots.map((slot) => {
+                        // Format slot to 12h label
+                        const displayLabel = dayjs(`2000-01-01 ${slot}`).format('h:mm A');
+                        return (
+                          <div 
+                            key={slot} 
+                            className="flex items-center justify-between px-3.5 py-2.5 bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm animate-fadeIn"
+                          >
+                            <span>{displayLabel}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeTimeSlot(slot)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 p-1 rounded-lg transition-colors cursor-pointer ml-2"
+                              title="Delete slot"
+                            >
+                              <FaTimes size={13} />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}

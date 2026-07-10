@@ -41,6 +41,13 @@ export const appointmentService = {
   getToday: () => api.post('/appointments/today')
 };
 
+export const reminderService = {
+  getUpcoming: () => api.get('/reminders/upcoming'),
+  getPending: () => api.get('/reminders/pending'),
+  sendReminder: (id) => api.post('/reminders/send', { id }),
+  sendAll: () => api.post('/reminders/send-all')
+};
+
 export const testimonialService = {
   getAll: (data) => api.post('/testimonials/all', data),
   getById: (id) => api.post(`/testimonials/by-id`, { id }),

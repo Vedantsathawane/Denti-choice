@@ -2,7 +2,18 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: (() => {
+    const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    try {
+      const url = new URL(envUrl);
+      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+        url.hostname = window.location.hostname;
+      }
+      return url.toString();
+    } catch (e) {
+      return envUrl;
+    }
+  })(),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'

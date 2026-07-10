@@ -340,7 +340,7 @@ const ContactMessages = () => {
                       <button
                         type="button"
                         onClick={() => setActiveMessage(null)}
-                        className="px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm hover:bg-gray-200 cursor-pointer"
+                        className="px-6 py-2.5 bg-gray-lighter hover:bg-gray-lighter-hover text-dark rounded-xl font-semibold text-sm transition-colors duration-200 cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -357,7 +357,7 @@ const ContactMessages = () => {
                   <div className="flex justify-end border-t border-gray-100 dark:border-gray-800 pt-4">
                     <button
                       onClick={() => setActiveMessage(null)}
-                      className="px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm hover:bg-gray-200 cursor-pointer"
+                      className="px-6 py-2.5 bg-gray-lighter hover:bg-gray-lighter-hover text-dark rounded-xl font-semibold text-sm transition-colors duration-200 cursor-pointer"
                     >
                       Close
                     </button>

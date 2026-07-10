@@ -31,6 +31,16 @@ export const getStatusLabel = (status) => {
 export const getApiImageUrl = (path) => {
   if (!path) return null;
   if (path.startsWith('http')) return path;
-  const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+  const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  let baseUrl = 'http://localhost:5000';
+  try {
+    const url = new URL(envUrl);
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+      url.hostname = window.location.hostname;
+    }
+    baseUrl = url.origin;
+  } catch (e) {
+    baseUrl = envUrl.replace('/api', '');
+  }
   return `${baseUrl}${path}`;
 };

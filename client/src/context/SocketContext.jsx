@@ -8,7 +8,18 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+    const socketUrl = (() => {
+      const envUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+      try {
+        const url = new URL(envUrl);
+        if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+          url.hostname = window.location.hostname;
+        }
+        return url.toString();
+      } catch (e) {
+        return envUrl;
+      }
+    })();
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       reconnection: true,

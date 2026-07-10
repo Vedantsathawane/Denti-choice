@@ -87,6 +87,19 @@ const SocketService = {
     } catch (error) {
       logger.error('Socket emit error (dashboard:update)', error);
     }
+  },
+
+  /**
+   * Emit doctors list updated event
+   */
+  emitDoctorsUpdated() {
+    try {
+      const io = getIO();
+      io.emit('doctors:updated');
+      logger.info('Socket: doctors:updated emitted');
+    } catch (error) {
+      logger.error('Socket emit error (doctors:updated)', error);
+    }
   }
 };
 
