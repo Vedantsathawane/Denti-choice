@@ -232,29 +232,31 @@ const Home = () => {
             <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">We provide comprehensive dental care services using the latest technology and techniques to ensure your comfort and satisfaction.</p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, idx) => {
-              const Icon = serviceIcons[service.name] || FaTooth;
-              return (
-                <motion.div
-                  key={service.id || idx}
-                  variants={fadeInUp}
-                  whileHover={{ y: -5 }}
-                  className="group bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 hover:border-primary/30 hover:shadow-card-hover transition-all duration-300"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Icon className="text-2xl text-primary group-hover:text-white transition-colors" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{service.name}</h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4">{service.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-primary font-semibold">From ${service.price}</span>
-                    <span className="text-xs text-gray-400">{service.duration}</span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+          {services.length > 0 && (
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service, idx) => {
+                const Icon = serviceIcons[service.name] || FaTooth;
+                return (
+                  <motion.div
+                    key={service.id || idx}
+                    variants={fadeInUp}
+                    whileHover={{ y: -5 }}
+                    className="group bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 hover:border-primary/30 hover:shadow-card-hover transition-all duration-300"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                      <Icon className="text-2xl text-primary group-hover:text-white transition-colors" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{service.name}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4">{service.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-primary font-semibold">From ${service.price}</span>
+                      <span className="text-xs text-gray-400">{service.duration}</span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
 
           <div className="text-center mt-10">
             <Link to="/services" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-primary text-white font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all hover:-translate-y-0.5">
@@ -297,28 +299,30 @@ const Home = () => {
             <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900 dark:text-white">Expert Dental Specialists</h2>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {doctors.map((doctor, idx) => (
-              <motion.div key={doctor.id || idx} variants={fadeInUp} whileHover={{ y: -5 }} className="group text-center">
-                <div className="relative mb-5 mx-auto w-48 h-48 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  {doctor.image ? (
-                    <img
-                      src={getApiImageUrl(doctor.image)}
-                      alt={doctor.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <FaUserMd className="text-6xl text-primary/40" />
-                  )}
-                  <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors rounded-full" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{doctor.name}</h3>
-                <p className="text-primary text-sm font-medium">{doctor.specialization}</p>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{doctor.qualification}</p>
-                <p className="text-xs text-gray-400 mt-1">{doctor.experience} years experience</p>
-              </motion.div>
-            ))}
-          </motion.div>
+          {doctors.length > 0 && (
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              {doctors.map((doctor, idx) => (
+                <motion.div key={doctor.id || idx} variants={fadeInUp} whileHover={{ y: -5 }} className="group text-center">
+                  <div className="relative mb-5 mx-auto w-48 h-48 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                    {doctor.image ? (
+                      <img
+                        src={getApiImageUrl(doctor.image)}
+                        alt={doctor.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <FaUserMd className="text-6xl text-primary/40" />
+                    )}
+                    <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors rounded-full" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{doctor.name}</h3>
+                  <p className="text-primary text-sm font-medium">{doctor.specialization}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{doctor.qualification}</p>
+                  <p className="text-xs text-gray-400 mt-1">{doctor.experience} years experience</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
 
           <div className="text-center mt-10">
             <Link to="/doctors" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all">
