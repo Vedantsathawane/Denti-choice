@@ -57,20 +57,38 @@ const Home = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [services, setServices] = useState([]);
+  const [doctorCount, setDoctorCount] = useState(6);
+  const [serviceCount, setServiceCount] = useState(10);
   const [openFaq, setOpenFaq] = useState(0);
 
   useEffect(() => {
     testimonialService.getAll({ is_visible: 1 }).then(r => setTestimonials(r.data.data)).catch(() => {});
-    doctorService.getAll({ is_active: 1 }).then(r => setDoctors(r.data.data?.slice(0, 3) || [])).catch(() => {});
-    serviceService.getAll({ is_active: 1 }).then(r => setServices(r.data.data?.slice(0, 6) || [])).catch(() => {});
+    doctorService.getAll({ is_active: 1 }).then(r => {
+      const docs = r.data.data || [];
+      setDoctors(docs.slice(0, 3));
+      setDoctorCount(docs.length);
+    }).catch(() => {});
+    serviceService.getAll({ is_active: 1 }).then(r => {
+      const srvs = r.data.data || [];
+      setServices(srvs.slice(0, 6));
+      setServiceCount(srvs.length);
+    }).catch(() => {});
   }, []);
 
   useSocketEvent('doctors:updated', () => {
-    doctorService.getAll({ is_active: 1 }).then(r => setDoctors(r.data.data?.slice(0, 3) || [])).catch(() => {});
+    doctorService.getAll({ is_active: 1 }).then(r => {
+      const docs = r.data.data || [];
+      setDoctors(docs.slice(0, 3));
+      setDoctorCount(docs.length);
+    }).catch(() => {});
   });
 
   useSocketEvent('services:updated', () => {
-    serviceService.getAll({ is_active: 1 }).then(r => setServices(r.data.data?.slice(0, 6) || [])).catch(() => {});
+    serviceService.getAll({ is_active: 1 }).then(r => {
+      const srvs = r.data.data || [];
+      setServices(srvs.slice(0, 6));
+      setServiceCount(srvs.length);
+    }).catch(() => {});
   });
 
   useSocketEvent('testimonials:updated', () => {
@@ -158,7 +176,7 @@ const Home = () => {
                 {[
                   { val: '15+', label: 'Years Experience' },
                   { val: '10K+', label: 'Happy Patients' },
-                  { val: '6', label: 'Expert Doctors' }
+                  { val: `${doctorCount}`, label: 'Expert Doctors' }
                 ].map(({ val, label }) => (
                   <div key={label}>
                     <div className="text-2xl font-bold text-white">{val}</div>
@@ -225,8 +243,8 @@ const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             <Counter end={15} label="Years of Experience" icon={FaAward} suffix="+" />
             <Counter end={10000} label="Happy Patients" icon={FaSmile} suffix="+" />
-            <Counter end={6} label="Expert Doctors" icon={FaUserMd} />
-            <Counter end={10} label="Dental Services" icon={FaTooth} />
+            <Counter end={doctorCount} label="Expert Doctors" icon={FaUserMd} />
+            <Counter end={serviceCount} label="Dental Services" icon={FaTooth} />
           </div>
         </div>
       </section>
