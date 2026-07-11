@@ -14,10 +14,12 @@ const greetingStyle = 'font-size: 20px; font-weight: 700; color: #002266; margin
 const paragraphStyle = 'font-size: 15px; color: #4A5D78; line-height: 1.6; margin-top: 0; margin-bottom: 24px;';
 const sectionTitleStyle = 'font-size: 15px; font-weight: 700; color: #0066FF; margin-top: 32px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #E6F0FF; padding-bottom: 8px;';
 
-const detailsCardStyle = 'background: linear-gradient(180deg, #F0F7FF, #FFFFFF); border: 1px solid #D6E4FF; border-radius: 16px; padding: 24px; margin: 24px 0; box-shadow: 0 4px 15px rgba(0, 102, 255, 0.03);';
+// Change background from gradient to solid color to support automatic dark-mode inverting
+const detailsCardStyle = 'background-color: #F8FAFC; border: 1px solid #D6E4FF; border-radius: 16px; padding: 24px; margin: 24px 0; box-shadow: 0 4px 15px rgba(0, 102, 255, 0.03);';
 const detailsTableStyle = 'width: 100%; border-collapse: collapse;';
 const detailsRowLabelStyle = 'padding: 12px 0; font-size: 14px; font-weight: 500; color: #4A5D78; text-align: left; border-bottom: 1px solid #E6F0FF; white-space: nowrap;';
-const detailsRowValueStyle = 'padding: 12px 0; font-size: 14px; font-weight: 700; color: #002266; text-align: right; border-bottom: 1px solid #E6F0FF;';
+// Added word-break: break-word to prevent text overflow on small screens
+const detailsRowValueStyle = 'padding: 12px 0; font-size: 14px; font-weight: 700; color: #002266; text-align: right; border-bottom: 1px solid #E6F0FF; word-break: break-word;';
 
 const badgeBase = 'display: inline-block; padding: 6px 14px; border-radius: 9999px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;';
 const badgePending = `${badgeBase} background-color: #FFFBEB; color: #D97706; border: 1px solid #FDE68A;`;
@@ -57,13 +59,147 @@ const emailWrapper = (content, title, settings = {}) => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>${title}</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { margin: 0; padding: 0; font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #F4F7FC; -webkit-font-smoothing: antialiased; }
+    
+    /* Mobile responsiveness queries */
     @media only screen and (max-width: 600px) {
       .container { border-radius: 0 !important; border: none !important; }
-      .content-body { padding: 30px 20px !important; }
+      .content-body { padding: 30px 16px !important; }
+      .details-card { padding: 16px !important; margin: 16px 0 !important; }
+      
+      /* Stack layout for table key-values on small screens */
+      .responsive-table, .responsive-table tbody, .responsive-table tr, .responsive-table td {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box;
+      }
+      
+      .responsive-table tr {
+        border-bottom: 1px solid #E6F0FF !important;
+        padding: 8px 0 !important;
+      }
+      
+      .responsive-table tr:last-child {
+        border-bottom: none !important;
+      }
+      
+      .responsive-table td {
+        padding: 2px 0 !important;
+        border-bottom: none !important;
+        text-align: left !important;
+        white-space: normal !important;
+      }
+      
+      .responsive-table td.label-cell {
+        font-size: 13px !important;
+        color: #7A8FA8 !important;
+      }
+      
+      .responsive-table td.value-cell {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        margin-top: 2px;
+        word-break: break-word !important;
+      }
+    }
+
+    /* Dark Mode styling overrides */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #0F172A !important;
+      }
+      .container {
+        background-color: #1E293B !important;
+        border-color: #334155 !important;
+        box-shadow: none !important;
+      }
+      .content-body {
+        background-color: #1E293B !important;
+      }
+      .details-card {
+        background-color: #0F172A !important;
+        background: #0F172A !important;
+        border-color: #334155 !important;
+        box-shadow: none !important;
+      }
+      .responsive-table tr {
+        border-bottom-color: #1E293B !important;
+      }
+      .responsive-table td.label-cell {
+        color: #94A3B8 !important;
+        border-bottom-color: #1E293B !important;
+      }
+      .responsive-table td.value-cell {
+        color: #F8FAFC !important;
+        border-bottom-color: #1E293B !important;
+      }
+      
+      /* Checklist and location items */
+      .checklist-table td {
+        color: #94A3B8 !important;
+      }
+      .location-card {
+        background-color: #0F172A !important;
+        background: #0F172A !important;
+        border-color: #334155 !important;
+      }
+      .location-card p, .location-card strong {
+        color: #F8FAFC !important;
+      }
+      
+      .footer {
+        background-color: #0F172A !important;
+        border-top-color: #334155 !important;
+      }
+      .footer p {
+        color: #94A3B8 !important;
+      }
+      .footer-title {
+        color: #F8FAFC !important;
+      }
+      
+      /* Reply label & text details */
+      .details-card .reply-label {
+        color: #38BDF8 !important;
+      }
+      .details-card .reply-text {
+        color: #F8FAFC !important;
+      }
+      
+      /* Generic text and headers */
+      h2, h3, strong {
+        color: #F8FAFC !important;
+      }
+      p {
+        color: #CBD5E1 !important;
+      }
+      
+      /* Badges in dark mode */
+      .badge-pending {
+        background-color: #78350F !important;
+        color: #FDE68A !important;
+        border-color: #D97706 !important;
+      }
+      .badge-confirmed {
+        background-color: #064E3B !important;
+        color: #A7F3D0 !important;
+        border-color: #059669 !important;
+      }
+      .badge-completed {
+        background-color: #1E3A8A !important;
+        color: #BFDBFE !important;
+        border-color: #2563EB !important;
+      }
+      .badge-cancelled {
+        background-color: #7F1D1D !important;
+        color: #FCA5A5 !important;
+        border-color: #DC2626 !important;
+      }
     }
   </style>
 </head>
@@ -83,7 +219,7 @@ const emailWrapper = (content, title, settings = {}) => {
     </div>
     <!-- Footer -->
     <div class="footer" style="${footerStyle}">
-      <p style="font-size: 14px; font-weight: 700; color: #002266; margin: 0 0 8px 0;">${clinicName}</p>
+      <p class="footer-title" style="font-size: 14px; font-weight: 700; color: #002266; margin: 0 0 8px 0;">${clinicName}</p>
       <p style="${footerTextStyle}">${clinicAddress}</p>
       <p style="${footerTextStyle}">📞 ${clinicPhone} | ✉️ ${clinicEmail}</p>
       <p style="${footerTextStyle} margin-top: 16px; font-size: 11px; color: #A5B8CF;">© ${new Date().getFullYear()} ${clinicName}. All rights reserved.</p>
@@ -134,31 +270,31 @@ const EmailService = {
         <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, your request has been logged and is pending confirmation.</p>
       </div>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">📋 Appointment ID</td>
-            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">📋 Appointment ID</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
-            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">🏥 Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">🏥 Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">📅 Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">📅 Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">🕐 Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">🕐 Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none;"><span style="${badgePending}">Pending</span></td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none;"><span class="badge-pending" style="${badgePending}">Pending</span></td>
           </tr>
         </table>
       </div>
@@ -167,7 +303,7 @@ const EmailService = {
         ${googleMapsUrl ? `<a href="${googleMapsUrl}" target="_blank" style="${btnStyle}">📍 View on Google Maps</a>` : ''}
       </div>
       
-      <div style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid ${BRAND_COLOR}; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78; margin-top: 25px;">
+      <div class="location-card" style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid ${BRAND_COLOR}; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78; margin-top: 25px;">
         <p style="margin: 0 0 8px 0; color: #002266;"><strong>📍 Location:</strong> ${clinicAddress}</p>
         <p style="margin: 0; color: #002266;"><strong>📞 Contact:</strong> ${clinicPhone}</p>
       </div>
@@ -186,39 +322,39 @@ const EmailService = {
       <h2 style="${greetingStyle}">🔔 New Appointment Booked</h2>
       <p style="${paragraphStyle}">A new appointment request has been submitted. Please review and manage it in the admin dashboard.</p>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">Patient</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Patient</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Email</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Email</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_email}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Phone</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Phone</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Doctor</td>
-            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Doctor</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">Message</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">Message</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
           </tr>
         </table>
       </div>
@@ -237,39 +373,39 @@ const EmailService = {
       <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
       <p style="${paragraphStyle}">A new patient appointment has been scheduled with you:</p>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">Appointment ID</td>
-            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Patient Name</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Patient Name</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Phone</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Phone</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Email</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Email</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_email}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
           </tr>
         </table>
       </div>
@@ -294,31 +430,31 @@ const EmailService = {
         <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, great news! Your slot is officially locked in.</p>
       </div>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">📋 Appointment ID</td>
-            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">📋 Appointment ID</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
-            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">🏥 Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">🏥 Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">📅 Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">📅 Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">🕐 Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">🕐 Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none;"><span style="${badgeConfirmed}">Confirmed</span></td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none;"><span class="badge-confirmed" style="${badgeConfirmed}">Confirmed</span></td>
           </tr>
         </table>
       </div>
@@ -328,7 +464,7 @@ const EmailService = {
       </div>
 
       <h3 style="${sectionTitleStyle}">📋 Before Your Visit:</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+      <table class="checklist-table" style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
         <tr>
           <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #10B981; vertical-align: top;">✓</td>
           <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">Please arrive 15 minutes before your scheduled time.</td>
@@ -347,7 +483,7 @@ const EmailService = {
         </tr>
       </table>
       
-      <div style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid #0066FF; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
+      <div class="location-card" style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid #0066FF; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
         <p style="margin: 0 0 8px 0; color: #002266;"><strong>📍 Location:</strong> ${clinicAddress}</p>
         <p style="margin: 0; color: #002266;"><strong>📞 Contact:</strong> ${clinicPhone}</p>
       </div>
@@ -360,39 +496,39 @@ const EmailService = {
       <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
       <p style="${paragraphStyle}">The following appointment has been confirmed and scheduled in your calendar:</p>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">Appointment ID</td>
-            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Patient</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Patient</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Phone</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Phone</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Email</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Email</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_email}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
           </tr>
         </table>
       </div>
@@ -414,38 +550,38 @@ const EmailService = {
         <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, your appointment has been cancelled.</p>
       </div>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">Appointment ID</td>
-            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Doctor</td>
-            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Doctor</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none; color: #DC2626;">Reason</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none; color: #DC2626;">"${appointment.cancellation_reason || 'No reason provided'}"</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none; color: #DC2626;">Reason</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none; color: #DC2626;">"${appointment.cancellation_reason || 'No reason provided'}"</td>
           </tr>
         </table>
       </div>
 
       <p style="${paragraphStyle}">If you would like to reschedule, please visit our website or contact our clinic.</p>
       
-      <div style="background-color: #FEF2F2; border: 1px solid #FCA5A5; border-left: 4px solid #DC2626; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
+      <div class="location-card" style="background-color: #FEF2F2; border: 1px solid #FCA5A5; border-left: 4px solid #DC2626; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
         <p style="margin: 0; color: #DC2626;"><strong>📞 Contact:</strong> ${clinicPhone}</p>
       </div>
     `;
@@ -456,23 +592,23 @@ const EmailService = {
       <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
       <p style="${paragraphStyle}">The following appointment has been cancelled:</p>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">Patient</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Patient</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none; color: #DC2626;">Reason</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none; color: #DC2626;">"${appointment.cancellation_reason || 'No reason provided'}"</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none; color: #DC2626;">Reason</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none; color: #DC2626;">"${appointment.cancellation_reason || 'No reason provided'}"</td>
           </tr>
         </table>
       </div>
@@ -492,19 +628,19 @@ const EmailService = {
         <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, thank you for choosing our clinic for your dental care.</p>
       </div>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">Doctor</td>
-            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Doctor</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">Date</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none;">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none;">${formatDate(appointment.appointment_date)}</td>
           </tr>
         </table>
       </div>
@@ -526,12 +662,12 @@ const EmailService = {
       <p style="${paragraphStyle}">Dear <strong>${contact.name}</strong>,</p>
       <p style="${paragraphStyle}">Thank you for reaching out. Here is our response to your question:</p>
       
-      <div style="${detailsCardStyle}">
-        <p style="font-size: 14px; font-weight: 700; color: #002266; margin: 0 0 6px 0;">Your Inquiry:</p>
-        <p style="font-size: 14px; color: #4A5D78; margin: 0 0 16px 0; font-style: italic; line-height: 1.5;">"${contact.message}"</p>
+      <div class="details-card" style="${detailsCardStyle}">
+        <p class="reply-label" style="font-size: 14px; font-weight: 700; color: #002266; margin: 0 0 6px 0;">Your Inquiry:</p>
+        <p class="reply-text" style="font-size: 14px; color: #4A5D78; margin: 0 0 16px 0; font-style: italic; line-height: 1.5;">"${contact.message}"</p>
         
-        <p style="font-size: 14px; font-weight: 700; color: ${BRAND_COLOR}; margin: 0 0 6px 0; border-top: 1px solid #E6F0FF; padding-top: 16px;">Our Reply:</p>
-        <p style="font-size: 14px; color: #002266; margin: 0; line-height: 1.5; font-weight: 500;">${replyMessage}</p>
+        <p class="reply-label" style="font-size: 14px; font-weight: 700; color: ${BRAND_COLOR}; margin: 0 0 6px 0; border-top: 1px solid #E6F0FF; padding-top: 16px;">Our Reply:</p>
+        <p class="reply-text" style="font-size: 14px; color: #002266; margin: 0; line-height: 1.5; font-weight: 500;">${replyMessage}</p>
       </div>
 
       <p style="${paragraphStyle}">If you have any further questions, feel free to reply directly to this email or call us at <strong>${clinicPhone}</strong>.</p>
@@ -560,31 +696,31 @@ const EmailService = {
         <p style="font-size: 15px; color: #4A5D78; margin: 0; line-height: 1.5;">Dear <strong>${appointment.patient_name}</strong>, this is a friendly reminder of your upcoming slot:</p>
       </div>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">📋 Appointment ID</td>
-            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">📋 Appointment ID</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
-            <td style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">👨‍⚕️ Doctor</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDoctorName(appointment.doctor_name)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">🏥 Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">🏥 Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">📅 Date</td>
-            <td style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">📅 Date</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatDate(appointment.appointment_date)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">🕐 Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">🕐 Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none;"><span style="${badgeConfirmed}">Confirmed</span></td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">📌 Status</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none;"><span class="badge-confirmed" style="${badgeConfirmed}">Confirmed</span></td>
           </tr>
         </table>
       </div>
@@ -594,7 +730,7 @@ const EmailService = {
       </div>
 
       <h3 style="${sectionTitleStyle}">📋 Preparation Instructions:</h3>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+      <table class="checklist-table" style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
         <tr>
           <td style="width: 24px; padding: 8px 0; font-size: 14px; color: #0066FF; vertical-align: top;">✓</td>
           <td style="padding: 8px 0 8px 8px; font-size: 14px; color: #4A5D78; line-height: 1.5;">Please arrive 10–15 minutes early to complete check-in.</td>
@@ -609,7 +745,7 @@ const EmailService = {
         </tr>
       </table>
 
-      <div style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid #0066FF; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
+      <div class="location-card" style="background-color: #F0F7FF; border: 1px solid #D6E4FF; border-left: 4px solid #0066FF; border-radius: 4px 12px 12px 4px; padding: 20px; font-size: 14px; color: #4A5D78;">
         <p style="margin: 0 0 8px 0; color: #002266;"><strong>📍 Location:</strong> ${clinicAddress}</p>
         <p style="margin: 0; color: #002266;"><strong>📞 Contact:</strong> ${clinicPhone} | ✉️ ${clinicEmail}</p>
       </div>
@@ -631,35 +767,35 @@ const EmailService = {
       <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
       <p style="${paragraphStyle}">This is a reminder that you have an upcoming appointment scheduled with the following patient:</p>
       
-      <div style="${detailsCardStyle}">
-        <table style="${detailsTableStyle}">
+      <div class="details-card" style="${detailsCardStyle}">
+        <table class="responsive-table" style="${detailsTableStyle}">
           <tr>
-            <td style="${detailsRowLabelStyle}">Appointment ID</td>
-            <td style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Appointment ID</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">#APT-${String(appointment.id).padStart(5, '0')}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Patient Name</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Patient Name</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Phone</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Phone</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_phone}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Email</td>
-            <td style="${detailsRowValueStyle}">${appointment.patient_email}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Email</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.patient_email}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Service</td>
-            <td style="${detailsRowValueStyle}">${appointment.service_name}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Service</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${appointment.service_name}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}">Time</td>
-            <td style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}">Time</td>
+            <td class="value-cell" style="${detailsRowValueStyle}">${formatTime(appointment.appointment_time)}</td>
           </tr>
           <tr>
-            <td style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
-            <td style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
+            <td class="label-cell" style="${detailsRowLabelStyle}; border-bottom: none;">Notes</td>
+            <td class="value-cell" style="${detailsRowValueStyle}; border-bottom: none; font-style: italic;">"${appointment.message || 'None'}"</td>
           </tr>
         </table>
       </div>
