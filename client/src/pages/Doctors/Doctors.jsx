@@ -113,7 +113,8 @@ const Doctors = () => {
                     </div>
 
                     <Link
-                      to="/appointment"
+                      to={`/appointment?doctorId=${doctor.id}`}
+                      state={{ doctorId: doctor.id }}
                       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
                     >
                       <FaCalendarCheck /> Book Appointment

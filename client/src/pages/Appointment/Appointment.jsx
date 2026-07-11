@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import Calendar from 'react-calendar';
@@ -14,6 +15,9 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { formatTime } from '../../utils/helpers';
 
 const Appointment = () => {
+  const location = useLocation();
+  const preselectedDoctorId = location.state?.doctorId ? String(location.state.doctorId) : (new URLSearchParams(location.search).get('doctorId') || '');
+
   const [doctors, setDoctors] = useState([]);
   const [services, setServices] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -23,7 +27,11 @@ const Appointment = () => {
   const [submitting, setSubmitting] = useState(false);
   const [booked, setBooked] = useState(false);
 
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
+  const { register, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm({
+    defaultValues: {
+      doctor_id: preselectedDoctorId
+    }
+  });
   const watchDoctor = watch('doctor_id');
 
   useEffect(() => {
@@ -35,6 +43,12 @@ const Appointment = () => {
       setServices(s.data.data || []);
     }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (doctors.length > 0 && preselectedDoctorId) {
+      setValue('doctor_id', preselectedDoctorId);
+    }
+  }, [doctors, preselectedDoctorId, setValue]);
 
   // Fetch available slots when doctor or date changes
   const fetchSlots = useCallback(async () => {
@@ -187,7 +201,7 @@ const Appointment = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Doctor *</label>
                   <select {...register('doctor_id', { required: 'Please select a doctor' })} className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none text-sm transition">
                     <option value="">Select Doctor</option>
-                    {doctors.map(d => <option key={d.id} value={d.id}>{d.name} - {d.specialization}</option>)}
+                    {doctors.map(d => <option key={d.id} value={String(d.id)}>{d.name} - {d.specialization}</option>)}
                   </select>
                   {errors.doctor_id && <p className="text-red-500 text-xs mt-1">{errors.doctor_id.message}</p>}
                 </div>
@@ -195,7 +209,7 @@ const Appointment = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Service *</label>
                   <select {...register('service_id', { required: 'Please select a service' })} className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none text-sm transition">
                     <option value="">Select Service</option>
-                    {services.map(s => <option key={s.id} value={s.id}>{s.name} - ${s.price}</option>)}
+                    {services.map(s => <option key={s.id} value={String(s.id)}>{s.name} - ${s.price}</option>)}
                   </select>
                   {errors.service_id && <p className="text-red-500 text-xs mt-1">{errors.service_id.message}</p>}
                 </div>
