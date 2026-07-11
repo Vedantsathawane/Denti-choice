@@ -144,7 +144,7 @@ const Home = () => {
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
                 Your Smile
                 <br />
-                <span className="text-accent">Deserves the Best</span>
+                <span className="text-secondary">Deserves the Best</span>
                 <br />
                 Dental Care
               </h1>
@@ -157,7 +157,7 @@ const Home = () => {
               <div className="flex flex-wrap gap-4">
                 <Link
                   to="/appointment"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-semibold hover:bg-accent transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-lg"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-semibold hover:bg-secondary hover:text-primary-dark transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-lg"
                 >
                   <FaCalendarCheck />
                   Book Appointment
@@ -522,7 +522,7 @@ const Home = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 to="/appointment"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-primary font-bold hover:bg-accent transition-all hover:-translate-y-1 hover:shadow-xl"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-primary font-bold hover:bg-secondary hover:text-primary-dark transition-all hover:-translate-y-1 hover:shadow-xl"
               >
                 <FaCalendarCheck /> Book Appointment
               </Link>
