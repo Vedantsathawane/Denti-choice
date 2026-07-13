@@ -1,7 +1,7 @@
 # Dentist-App Project Rules and Preferences
 
 ## Deployment Strategy
-This project is designated to be deployed using 100% free-tier services:
-- **Frontend (React)**: Vercel or Netlify (100% Free)
-- **Backend (Node.js/Express)**: Render (Free tier for web services)
-- **Database (MySQL)**: Aiven or TiDB Cloud (Free-tier MySQL databases)
+This project is deployed using 100% free-tier services:
+- **Frontend (React)**: Vercel (https://denti-choice-three.vercel.app)
+- **Backend (Node.js/Express)**: Render (https://denti-choice.onrender.com)
+- **Database (MySQL)**: Aiven MySQL (mysql-203d5dd6-vedantsathawane2503-denti-choice.i.aivencloud.com)
