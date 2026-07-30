@@ -46,7 +46,7 @@ const AppointmentController = {
         return error(res, 'Cannot book an appointment for a past date.', 400);
       }
 
-      const result = await AppointmentService.book(req.body);
+      const result = await AppointmentService.book({ ...req.body, clinic_id: req.clinicId });
 
       if (result.error === 'SLOT_TAKEN') {
         return error(res, 'Slot Already Booked. Please choose a different time.', 409);

@@ -18,6 +18,7 @@ const AppointmentService = {
   async book(data) {
     // 1. Create or find patient
     const patientId = await PatientModel.findOrCreate({
+      clinic_id: data.clinic_id,
       full_name: data.full_name,
       email: data.email,
       phone: data.phone,
@@ -28,6 +29,7 @@ const AppointmentService = {
 
     // 2. Create appointment
     const result = await AppointmentModel.create({
+      clinic_id: data.clinic_id,
       patient_id: patientId,
       doctor_id: data.doctor_id,
       service_id: data.service_id,

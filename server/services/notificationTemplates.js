@@ -11,6 +11,25 @@ const NotificationTemplates = {
 
     switch (type) {
       case 'created':
+        subject = `Booking Received - ${data.clinic_name || 'Denti-Choice'}`;
+        html = `
+          <div style="font-family: Arial, sans-serif; padding: 25px; color: #002266; line-height: 1.6; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 16px;">
+            <h2 style="color: #D97706; margin-top: 0;">Booking Received</h2>
+            <p>Hello <strong>${data.patient_name}</strong>,</p>
+            <p>Your appointment request has been successfully received and is currently <strong>pending confirmation</strong>. We will review it shortly and send you another email once your slot is confirmed.</p>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 12px; margin: 15px 0;">
+              <strong>Clinic:</strong> ${data.clinic_name || 'Denti-Choice Clinic'}<br/>
+              <strong>Doctor:</strong> Dr. ${data.doctor_name}<br/>
+              <strong>Service:</strong> ${data.service_name}<br/>
+              <strong>Date:</strong> ${data.appointment_date}<br/>
+              <strong>Time:</strong> ${data.appointment_time}<br/>
+              <strong>Location:</strong> ${data.clinic_address || 'Clinic Address'}
+            </div>
+            <p>Thank you for choosing us!</p>
+          </div>
+        `;
+        break;
+
       case 'confirmed':
         subject = `Appointment Confirmed - ${data.clinic_name || 'Denti-Choice'}`;
         html = `

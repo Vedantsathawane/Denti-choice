@@ -156,6 +156,34 @@ const receptionistTools = {
           [clinicId, appointmentId]
         );
 
+        // Fetch full details and trigger email/notification suite
+        const appointment = await AppointmentModel.findById(appointmentId);
+        if (appointment) {
+          const EmailService = require('../../services/emailService');
+          const NotificationService = require('../../services/notificationService');
+
+          EmailService.sendAdminNotification(appointment).catch(e => console.error('AI booking admin email error', e));
+          EmailService.sendDoctorNewPatient(appointment).catch(e => console.error('AI booking doctor email error', e));
+
+          NotificationService.triggerEvent(
+            clinicId,
+            appointment.patient_id,
+            appointment.patient_email || appointment.email,
+            appointment.patient_phone || appointment.phone,
+            'created',
+            {
+              patient_name: appointment.patient_name || appointment.full_name,
+              clinic_name: appointment.clinic_name || 'Denti-Choice Clinic',
+              doctor_name: appointment.doctor_name || 'Staff',
+              service_name: appointment.service_name || 'Treatment',
+              appointment_date: appointment.appointment_date,
+              appointment_time: appointment.appointment_time,
+              clinic_address: '123 Smile Street, Suite A',
+              review_link: `http://denti-choice.com/review?clinic_id=${clinicId}`
+            }
+          ).catch(e => console.error('AI booking patient notification error', e));
+        }
+
         // Realtime Socket updates
         emitRealTimeUpdate('dashboard', 'dashboard:update', { action: 'book', appointmentId });
         emitRealTimeUpdate('appointments', 'appointment:booked', { appointmentId });

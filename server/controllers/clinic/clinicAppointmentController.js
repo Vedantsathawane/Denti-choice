@@ -44,6 +44,31 @@ const ClinicAppointmentController = {
       SocketService.emitAppointmentBooked(appointment);
       SocketService.emitSlotsUpdated(data.doctor_id, data.appointment_date);
 
+      // Trigger doctor notification (non-blocking)
+      const EmailService = require('../../services/emailService');
+      EmailService.sendDoctorNewPatient(appointment).catch(e => console.error('Dashboard booking doctor email error', e));
+
+      // Trigger patient notification based on creation status (non-blocking)
+      const NotificationServiceUpgrade = require('../../services/notificationService');
+      const eventType = appointment.status === 'confirmed' ? 'confirmed' : 'created';
+      NotificationServiceUpgrade.triggerEvent(
+        clinicId,
+        appointment.patient_id,
+        appointment.patient_email || appointment.email,
+        appointment.patient_phone || appointment.phone,
+        eventType,
+        {
+          patient_name: appointment.patient_name || appointment.full_name,
+          clinic_name: appointment.clinic_name || 'Denti-Choice Clinic',
+          doctor_name: appointment.doctor_name || 'Staff',
+          service_name: appointment.service_name || 'Treatment',
+          appointment_date: appointment.appointment_date,
+          appointment_time: appointment.appointment_time,
+          clinic_address: '123 Smile Street, Suite A',
+          review_link: `http://denti-choice.com/review?clinic_id=${clinicId}`
+        }
+      ).catch(e => console.error('Dashboard booking patient notification error', e));
+
       return created(res, appointment, 'Appointment booked successfully');
     } catch (err) {
       if (err.message === 'SLOT_ALREADY_BOOKED') {

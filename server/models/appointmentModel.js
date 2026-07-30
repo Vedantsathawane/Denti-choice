@@ -120,20 +120,28 @@ const AppointmentModel = {
 
       // Insert appointment
       const [result] = await connection.query(
-        `INSERT INTO appointments (patient_id, doctor_id, service_id, appointment_date, appointment_time, message)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [data.patient_id, data.doctor_id, data.service_id, data.appointment_date, data.appointment_time, data.message || null]
+        `INSERT INTO appointments (clinic_id, patient_id, doctor_id, service_id, appointment_date, appointment_time, message)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [data.clinic_id || 1, data.patient_id, data.doctor_id, data.service_id, data.appointment_date, data.appointment_time, data.message || null]
+      );
+
+      const appointmentId = result.insertId;
+
+      // Add to mapping table for AI backward compatibility
+      await connection.query(
+        'INSERT IGNORE INTO clinic_appointments (clinic_id, appointment_id) VALUES (?, ?)',
+        [data.clinic_id || 1, appointmentId]
       );
 
       // Log creation
       await connection.query(
         `INSERT INTO appointment_logs (appointment_id, new_status, changed_by, notes)
          VALUES (?, 'pending', ?, 'Appointment booked')`,
-        [result.insertId, 'Patient']
+        [appointmentId, 'Patient']
       );
 
       await connection.commit();
-      return { id: result.insertId };
+      return { id: appointmentId };
     } catch (error) {
       await connection.rollback();
       throw error;

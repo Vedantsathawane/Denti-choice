@@ -45,8 +45,8 @@ const PatientModel = {
 
   async create(data) {
     const [result] = await pool.query(
-      'INSERT INTO patients (full_name, email, phone, age, gender, address) VALUES (?, ?, ?, ?, ?, ?)',
-      [data.full_name, data.email, data.phone, data.age || null, data.gender || null, data.address || null]
+      'INSERT INTO patients (clinic_id, full_name, email, phone, age, gender, address) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [data.clinic_id || 1, data.full_name, data.email, data.phone, data.age || null, data.gender || null, data.address || null]
     );
     return result.insertId;
   },
