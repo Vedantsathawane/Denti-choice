@@ -99,9 +99,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.get('/api/debug/notifications', async (req, res, next) => {
   try {
     const { pool } = require('./config/db');
-    const [rows] = await pool.query(
-      'SELECT id, clinic_id, recipient, channel, type, status, error_message, sent_time FROM notification_history ORDER BY id DESC LIMIT 20'
-    );
+    const [rows] = await pool.query('DESCRIBE notification_history');
     return res.json({ success: true, count: rows.length, data: rows });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
