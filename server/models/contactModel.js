@@ -2,8 +2,8 @@ const { pool } = require('../config/db');
 
 const ContactModel = {
   async findAll(filters = {}) {
-    let query = 'SELECT * FROM contact_messages WHERE 1=1';
-    const params = [];
+    let query = 'SELECT * FROM contact_messages WHERE clinic_id = ?';
+    const params = [filters.clinic_id || 1];
     if (filters.is_read !== undefined) { query += ' AND is_read = ?'; params.push(filters.is_read); }
     if (filters.search) {
       query += ' AND (name LIKE ? OR email LIKE ? OR subject LIKE ?)';
@@ -20,8 +20,8 @@ const ContactModel = {
   },
 
   async count(filters = {}) {
-    let query = 'SELECT COUNT(*) as total FROM contact_messages WHERE 1=1';
-    const params = [];
+    let query = 'SELECT COUNT(*) as total FROM contact_messages WHERE clinic_id = ?';
+    const params = [filters.clinic_id || 1];
     if (filters.is_read !== undefined) { query += ' AND is_read = ?'; params.push(filters.is_read); }
     if (filters.search) {
       query += ' AND (name LIKE ? OR email LIKE ? OR subject LIKE ?)';
@@ -38,8 +38,8 @@ const ContactModel = {
 
   async create(data) {
     const [result] = await pool.query(
-      'INSERT INTO contact_messages (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)',
-      [data.name, data.email, data.phone || null, data.subject || null, data.message]
+      'INSERT INTO contact_messages (clinic_id, name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?, ?)',
+      [data.clinic_id || 1, data.name, data.email, data.phone || null, data.subject || null, data.message]
     );
     return result.insertId;
   },

@@ -60,7 +60,7 @@ const AdminLayout = () => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.emit('join:dashboard');
+    socket.emit('join:dashboard', { clinicId: user?.clinic_id });
 
     const handleNewNotification = (notification) => {
       setNotifications((prev) => [notification, ...prev].slice(0, 10));

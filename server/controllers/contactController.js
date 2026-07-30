@@ -7,8 +7,9 @@ const { success, created, error, paginated } = require('../utils/apiResponse');
 const ContactController = {
   async getAll(req, res, next) {
     try {
+      const clinicId = req.clinicId || 1;
       const { search, is_read, page = 1, limit = 10 } = { ...req.query, ...req.body };
-      const filters = { search, page: parseInt(page), limit: parseInt(limit) };
+      const filters = { clinic_id: clinicId, search, page: parseInt(page), limit: parseInt(limit) };
       if (is_read !== undefined) filters.is_read = parseInt(is_read);
       const [messages, total] = await Promise.all([
         ContactModel.findAll(filters),
@@ -21,15 +22,18 @@ const ContactController = {
   async getById(req, res, next) {
     try {
       const id = req.body.id || req.params.id;
+      const clinicId = req.clinicId || 1;
       const message = await ContactModel.findById(id);
-      if (!message) return error(res, 'Message not found.', 404);
+      if (!message || message.clinic_id !== clinicId) return error(res, 'Message not found.', 404);
       return success(res, message);
     } catch (err) { next(err); }
   },
 
   async create(req, res, next) {
     try {
-      const id = await ContactModel.create(req.body);
+      const clinicId = req.clinicId || 1;
+      const data = { ...req.body, clinic_id: clinicId };
+      const id = await ContactModel.create(data);
       const message = await ContactModel.findById(id);
 
       // Create notification and emit socket event

@@ -3,6 +3,7 @@ const logger = require('../utils/logger');
 const WhatsAppService = require('./whatsappService');
 const NotificationTemplates = require('./notificationTemplates');
 const SocketService = require('./socketService');
+const NotificationModel = require('../models/notificationModel');
 
 const NotificationService = {
   /**
@@ -261,6 +262,50 @@ const NotificationService = {
     }
 
     return result;
+  },
+
+  async create(clinicId, type, title, message, data = null) {
+    try {
+      const id = await NotificationModel.create({ clinic_id: clinicId, type, title, message, data });
+      const notification = { id, clinic_id: clinicId, type, title, message, data, is_read: 0, created_at: new Date() };
+      SocketService.emitNotification(notification);
+      return id;
+    } catch (err) {
+      logger.error('Failed to create in-app notification:', err.message);
+    }
+  },
+
+  async appointmentBooked(appointment) {
+    const clinicId = appointment.clinic_id || 1;
+    return this.create(
+      clinicId,
+      'appointment',
+      'New Appointment Booked',
+      `${appointment.patient_name} booked an appointment with Dr. ${appointment.doctor_name} on ${appointment.appointment_date}`,
+      { appointment_id: appointment.id }
+    );
+  },
+
+  async appointmentStatusChanged(appointment, newStatus) {
+    const clinicId = appointment.clinic_id || 1;
+    return this.create(
+      clinicId,
+      'appointment',
+      `Appointment ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
+      `Appointment #APT-${String(appointment.id).padStart(5, '0')} for ${appointment.patient_name} has been ${newStatus}`,
+      { appointment_id: appointment.id, status: newStatus }
+    );
+  },
+
+  async newContactMessage(contact) {
+    const clinicId = contact.clinic_id || 1;
+    return this.create(
+      clinicId,
+      'message',
+      'New Contact Message',
+      `New message from ${contact.name}: ${contact.subject || 'No subject'}`,
+      { contact_id: contact.id }
+    );
   }
 };
 

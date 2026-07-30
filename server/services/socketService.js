@@ -59,9 +59,33 @@ const SocketService = {
   emitNotification(notification) {
     try {
       const io = getIO();
-      io.to('dashboard').emit('notification:new', notification);
+      if (notification && notification.clinic_id) {
+        io.to(`dashboard:${notification.clinic_id}`).emit('notification:new', notification);
+        io.to('dashboard').emit('notification:new', { ...notification, clinicId: notification.clinic_id });
+      } else {
+        io.to('dashboard').emit('notification:new', notification);
+      }
     } catch (error) {
       logger.error('Socket emit error (notification:new)', error);
+    }
+  },
+
+  /**
+   * Emit event to a specific clinic's dashboard room
+   */
+  emitToClinic(clinicId, eventName, payload) {
+    try {
+      const io = getIO();
+      if (clinicId) {
+        io.to(`dashboard:${clinicId}`).emit(eventName, payload);
+        io.to('dashboard').emit(eventName, { ...payload, clinicId });
+        logger.info(`Socket: ${eventName} emitted to clinic ${clinicId}`);
+      } else {
+        io.to('dashboard').emit(eventName, payload);
+        logger.info(`Socket: ${eventName} emitted to global dashboard`);
+      }
+    } catch (error) {
+      logger.error(`Socket emitToClinic error for event ${eventName}`, error);
     }
   },
 

@@ -4,8 +4,9 @@ const { success, error, paginated } = require('../utils/apiResponse');
 const NotificationController = {
   async getAll(req, res, next) {
     try {
+      const clinicId = req.clinicId || 1;
       const { is_read, type, page = 1, limit = 20 } = { ...req.query, ...req.body };
-      const filters = { page: parseInt(page), limit: parseInt(limit) };
+      const filters = { clinic_id: clinicId, page: parseInt(page), limit: parseInt(limit) };
       if (is_read !== undefined) filters.is_read = parseInt(is_read);
       if (type) filters.type = type;
       const [notifications, total] = await Promise.all([
@@ -19,14 +20,17 @@ const NotificationController = {
   async markAsRead(req, res, next) {
     try {
       const id = req.body.id || req.params.id;
-      await NotificationModel.markAsRead(id);
+      const clinicId = req.clinicId || 1;
+      const { pool } = require('../config/db');
+      await pool.query('UPDATE notifications SET is_read = 1 WHERE id = ? AND clinic_id = ?', [id, clinicId]);
       return success(res, null, 'Notification marked as read');
     } catch (err) { next(err); }
   },
 
   async markAllAsRead(req, res, next) {
     try {
-      await NotificationModel.markAllAsRead();
+      const clinicId = req.clinicId || 1;
+      await NotificationModel.markAllAsRead(clinicId);
       return success(res, null, 'All notifications marked as read');
     } catch (err) { next(err); }
   },
@@ -34,15 +38,18 @@ const NotificationController = {
   async delete(req, res, next) {
     try {
       const id = req.body.id || req.params.id;
-      const deleted = await NotificationModel.delete(id);
-      if (!deleted) return error(res, 'Notification not found.', 404);
+      const clinicId = req.clinicId || 1;
+      const { pool } = require('../config/db');
+      const [result] = await pool.query('DELETE FROM notifications WHERE id = ? AND clinic_id = ?', [id, clinicId]);
+      if (result.affectedRows === 0) return error(res, 'Notification not found.', 404);
       return success(res, null, 'Notification deleted');
     } catch (err) { next(err); }
   },
 
   async getUnreadCount(req, res, next) {
     try {
-      const count = await NotificationModel.getUnreadCount();
+      const clinicId = req.clinicId || 1;
+      const count = await NotificationModel.getUnreadCount(clinicId);
       return success(res, { count });
     } catch (err) { next(err); }
   },

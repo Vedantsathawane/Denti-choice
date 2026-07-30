@@ -21,9 +21,15 @@ const initSocket = (httpServer) => {
     console.log(`🔌 Client connected: ${socket.id}`);
 
     // Join rooms for targeted updates
-    socket.on('join:dashboard', () => {
+    socket.on('join:dashboard', (data) => {
       socket.join('dashboard');
       console.log(`📊 ${socket.id} joined dashboard room`);
+
+      const clinicId = data?.clinicId || data;
+      if (clinicId) {
+        socket.join(`dashboard:${clinicId}`);
+        console.log(`📊 ${socket.id} joined dashboard:${clinicId} room`);
+      }
     });
 
     socket.on('join:appointments', () => {

@@ -204,10 +204,11 @@ const BillingService = {
       // Trigger payment success notification (non-blocking)
       try {
         const [ownerRows] = await connection.query(
-          'SELECT name, email, phone FROM users WHERE clinic_id = ? AND role = "owner" LIMIT 1',
+          'SELECT name, email FROM clinic_users WHERE clinic_id = ? AND role = "owner" LIMIT 1',
           [clinicId]
         );
-        const owner = ownerRows[0] || { name: 'Clinic Owner', email: 'owner@dentist.com', phone: '1234567890' };
+        const owner = ownerRows[0] || { name: 'Clinic Owner', email: 'owner@dentist.com' };
+        owner.phone = '1234567890';
         const [clinicRows] = await connection.query('SELECT name FROM clinics WHERE id = ?', [clinicId]);
         const clinicName = clinicRows[0]?.name || 'Denti-Choice Clinic';
 
