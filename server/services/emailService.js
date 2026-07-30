@@ -2,6 +2,7 @@ const { createTransporter } = require('../config/mailer');
 const logger = require('../utils/logger');
 const { formatDate, formatTime } = require('../utils/helpers');
 const SettingModel = require('../models/settingModel');
+const { pool } = require('../config/db');
 
 const BRAND_COLOR = '#0066FF';
 const ACCENT_COLOR = '#00F5D4';
@@ -232,14 +233,99 @@ const emailWrapper = (content, title, settings = {}) => {
 
 const EmailService = {
   /**
+   * Resolve multi-tenant settings dynamically based on appointment context
+   */
+  async getSettings(appointment) {
+    if (!appointment || !appointment.id) {
+      return SettingModel.getAll();
+    }
+    
+    try {
+      const [mappings] = await pool.query(
+        'SELECT clinic_id FROM clinic_appointments WHERE appointment_id = ?',
+        [appointment.id]
+      );
+      
+      if (mappings.length === 0) {
+        return SettingModel.getAll();
+      }
+      
+      const clinicId = mappings[0].clinic_id;
+      const [rows] = await pool.query(
+        'SELECT setting_key, setting_value FROM clinic_settings WHERE clinic_id = ?',
+        [clinicId]
+      );
+      
+      if (rows.length === 0) {
+        return SettingModel.getAll();
+      }
+      
+      const settingsMap = {};
+      rows.forEach(r => {
+        settingsMap[r.setting_key] = r.setting_value;
+      });
+      
+      return {
+        clinic_name: settingsMap.clinicName || settingsMap.clinic_name || 'Denti-Choice',
+        clinic_address: settingsMap.clinicAddress || settingsMap.clinic_address || '123 Dental Avenue',
+        clinic_phone: settingsMap.clinicPhone || settingsMap.clinic_phone || '+1 (555) 123-4567',
+        clinic_email: settingsMap.clinicEmail || settingsMap.clinic_email || 'info@dentichoice.com',
+        google_maps_url: settingsMap.googleMapsUrl || settingsMap.google_maps_url || '',
+        smtp_host: settingsMap.smtpHost || settingsMap.smtp_host,
+        smtp_port: settingsMap.smtpPort || settingsMap.smtp_port,
+        smtp_user: settingsMap.smtpUser || settingsMap.smtp_user,
+        smtp_pass: settingsMap.smtpPass || settingsMap.smtp_pass
+      };
+    } catch (err) {
+      logger.error('Error loading clinic-specific email settings:', err);
+      return SettingModel.getAll();
+    }
+  },
+
+  /**
    * Send email
    */
   async send(to, subject, html, settings = {}) {
     try {
-      const transporter = createTransporter(settings);
+      const brevoKey = process.env.BREVO_API_KEY;
+      const resendKey = process.env.RESEND_API_KEY;
       const fromName = settings.clinic_name || process.env.SMTP_FROM_NAME || 'Denti-Choice';
-      const fromEmail = settings.clinic_email || process.env.SMTP_FROM_EMAIL || settings.smtp_user || process.env.SMTP_USER;
-      
+      const fromEmail = settings.clinic_email || process.env.SMTP_FROM_EMAIL || settings.smtp_user || process.env.SMTP_USER || 'sathawanevedant2503@gmail.com';
+
+      if (brevoKey) {
+        const axios = require('axios');
+        await axios.post('https://api.brevo.com/v3/smtp/email', {
+          sender: { name: fromName, email: fromEmail },
+          to: [{ email: to }],
+          subject: subject,
+          htmlContent: html
+        }, {
+          headers: {
+            'api-key': brevoKey,
+            'Content-Type': 'application/json'
+          }
+        });
+        logger.email(`Email sent to ${to} via Brevo HTTPS API: ${subject}`);
+        return true;
+      } else if (resendKey) {
+        const axios = require('axios');
+        await axios.post('https://api.resend.com/emails', {
+          from: `"${fromName}" <${fromEmail}>`,
+          to: [to],
+          subject: subject,
+          html: html
+        }, {
+          headers: {
+            'Authorization': `Bearer ${resendKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        logger.email(`Email sent to ${to} via Resend HTTPS API: ${subject}`);
+        return true;
+      }
+
+      // Fallback to Nodemailer SMTP
+      const transporter = createTransporter(settings);
       const info = await transporter.sendMail({
         from: `"${fromName}" <${fromEmail}>`,
         to,
@@ -258,7 +344,7 @@ const EmailService = {
    * Booking confirmation to patient
    */
   async sendBookingConfirmation(appointment) {
-    const settings = await SettingModel.getAll();
+    const settings = await this.getSettings(appointment);
     const clinicAddress = settings.clinic_address || '123 Dental Avenue, Healthcare District, New York, NY 10001';
     const clinicPhone = settings.clinic_phone || '+1 (555) 123-4567';
     const googleMapsUrl = settings.google_maps_url || 'https://maps.google.com/?q=123+Dental+Avenue+New+York';
@@ -317,7 +403,7 @@ const EmailService = {
    * New appointment notification to admin
    */
   async sendAdminNotification(appointment) {
-    const settings = await SettingModel.getAll();
+    const settings = await this.getSettings(appointment);
     const content = `
       <h2 style="${greetingStyle}">🔔 New Appointment Booked</h2>
       <p style="${paragraphStyle}">A new appointment request has been submitted. Please review and manage it in the admin dashboard.</p>
@@ -367,7 +453,7 @@ const EmailService = {
    * New patient notification to doctor
    */
   async sendDoctorNewPatient(appointment) {
-    const settings = await SettingModel.getAll();
+    const settings = await this.getSettings(appointment);
     const content = `
       <h2 style="${greetingStyle}">👤 New Appointment Scheduled</h2>
       <p style="${paragraphStyle}">Dear Dr. <strong>${appointment.doctor_name}</strong>,</p>
@@ -417,7 +503,7 @@ const EmailService = {
    * Appointment confirmed emails
    */
   async sendAppointmentConfirmed(appointment) {
-    const settings = await SettingModel.getAll();
+    const settings = await this.getSettings(appointment);
     const clinicAddress = settings.clinic_address || '123 Dental Avenue, Healthcare District, New York, NY 10001';
     const clinicPhone = settings.clinic_phone || '+1 (555) 123-4567';
     const googleMapsUrl = settings.google_maps_url || 'https://maps.google.com/?q=123+Dental+Avenue+New+York';
@@ -540,7 +626,7 @@ const EmailService = {
    * Appointment cancelled emails
    */
   async sendAppointmentCancelled(appointment) {
-    const settings = await SettingModel.getAll();
+    const settings = await this.getSettings(appointment);
     const clinicPhone = settings.clinic_phone || '+1 (555) 123-4567';
 
     const patientContent = `
@@ -620,7 +706,7 @@ const EmailService = {
    * Appointment completed - Thank you email
    */
   async sendAppointmentCompleted(appointment) {
-    const settings = await SettingModel.getAll();
+    const settings = await this.getSettings(appointment);
     const content = `
       <div style="text-align: center; margin-bottom: 24px;">
         <div style="display: inline-block; width: 56px; height: 56px; line-height: 56px; border-radius: 50%; background-color: #EFF6FF; border: 1px solid #BFDBFE; color: #0066FF; font-size: 24px; margin-bottom: 16px; text-align: center; vertical-align: middle;">🎉</div>
@@ -801,6 +887,43 @@ const EmailService = {
       </div>
     `;
     return this.send(appointment.doctor_email, subject, emailWrapper(content, 'Doctor Appointment Reminder', settings), settings);
+  },
+
+  async sendWelcomeEmail(ownerName, ownerEmail, password, subdomain) {
+    const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`;
+    const subject = 'Welcome to Denti-Choice - Your Clinic Space is Ready!';
+    
+    const content = `
+      <div style="font-family: sans-serif; padding: 20px; color: #002266;">
+        <h2 style="color: #0066FF;">Welcome to Denti-Choice!</h2>
+        <p>Dear ${ownerName},</p>
+        <p>Congratulations! Your tenant clinic portal has been initialized and is ready for use.</p>
+        <div style="background: #F8FAFC; border: 1px solid #D6E4FF; border-radius: 12px; padding: 20px; margin: 20px 0;">
+          <strong>Your Login Credentials:</strong><br/>
+          <strong>Email:</strong> ${ownerEmail}<br/>
+          <strong>Password:</strong> ${password}<br/>
+          <strong>Access Subdomain:</strong> ${subdomain}.dentist-choice.com<br/>
+          <strong>Login URL:</strong> <a href="${loginUrl}">${loginUrl}</a>
+        </div>
+        <p>We are excited to help you streamline your dentist appointment management and leverage AI receptionist capabilities!</p>
+        <p>Best Regards,<br/>Denti-Choice SaaS Platform Team</p>
+      </div>
+    `;
+
+    try {
+      const transporter = createTransporter();
+      await transporter.sendMail({
+        from: process.env.SMTP_FROM || '"Denti-Choice Admin" <admin@dentichoice.com>',
+        to: ownerEmail,
+        subject: subject,
+        html: content
+      });
+      logger.info(`Welcome Email successfully sent to ${ownerEmail}`);
+      return true;
+    } catch (err) {
+      logger.error(`Welcome Email failed to send: ${err.message}`);
+      return false;
+    }
   }
 };
 
