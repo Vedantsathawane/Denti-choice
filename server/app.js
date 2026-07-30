@@ -95,19 +95,6 @@ if (process.env.NODE_ENV === 'development') {
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Debug route
-app.get('/api/debug/notifications', async (req, res, next) => {
-  try {
-    const { pool } = require('./config/db');
-    const [rows] = await pool.query(
-      "SELECT id, clinic_id, setting_key, CASE WHEN setting_key LIKE '%pass%' OR setting_key LIKE '%key%' THEN '********' ELSE setting_value END as setting_value FROM clinic_settings WHERE clinic_id = 1"
-    );
-    return res.json({ success: true, count: rows.length, data: rows });
-  } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);

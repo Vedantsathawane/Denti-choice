@@ -64,16 +64,22 @@ const NotificationService = {
             smtp_user: settingsMap.smtp_user || settingsMap.smtpUser,
             smtp_pass: settingsMap.smtp_pass || settingsMap.smtpPass,
             clinic_name: settingsMap.clinic_name || settingsMap.clinicName,
-            clinic_email: settingsMap.clinic_email || settingsMap.clinicEmail
+            clinic_email: settingsMap.clinic_email || settingsMap.clinicEmail,
+            email_provider: settingsMap.email_provider || settingsMap.emailProvider,
+            email_api_key: settingsMap.email_api_key || settingsMap.emailApiKey
           };
         } catch (err) {
           logger.error('Failed to load clinic email settings in notification service:', err.message);
         }
 
-        const brevoKey = process.env.BREVO_API_KEY;
-        const resendKey = process.env.RESEND_API_KEY;
+        const brevoKey = settings.email_provider === 'brevo' && settings.email_api_key ? settings.email_api_key : process.env.BREVO_API_KEY;
+        const resendKey = settings.email_provider === 'resend' && settings.email_api_key ? settings.email_api_key : process.env.RESEND_API_KEY;
         const fromName = settings.clinic_name || process.env.SMTP_FROM_NAME || 'Denti-Choice Notifications';
-        const fromEmail = settings.clinic_email || process.env.SMTP_FROM_EMAIL || settings.smtp_user || process.env.SMTP_USER || 'notifications@dentichoice.com';
+        let fromEmail = settings.clinic_email || process.env.SMTP_FROM_EMAIL || settings.smtp_user || process.env.SMTP_USER || 'notifications@dentichoice.com';
+
+        if (resendKey && (fromEmail.includes('@gmail.com') || fromEmail.includes('@yahoo.com') || fromEmail.includes('@outlook.com'))) {
+          fromEmail = 'onboarding@resend.dev';
+        }
 
         if (brevoKey) {
           const axios = require('axios');
