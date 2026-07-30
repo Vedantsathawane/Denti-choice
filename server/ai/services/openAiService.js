@@ -36,7 +36,7 @@ const getAiModel = async (clinicId) => {
   if (geminiKey) {
     const google = createGoogleGenerativeAI({ apiKey: geminiKey });
     return {
-      model: google('gemini-3.5-flash'),
+      model: google('gemini-1.5-flash'),
       providerName: 'gemini',
       key: geminiKey
     };
