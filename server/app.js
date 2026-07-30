@@ -100,7 +100,7 @@ app.get('/api/debug/notifications', async (req, res, next) => {
   try {
     const { pool } = require('./config/db');
     const [rows] = await pool.query(
-      'SELECT id, clinic_id, recipient, channel, type, status, error_message, sent_time FROM notification_history ORDER BY id DESC LIMIT 20'
+      'SELECT * FROM notification_history ORDER BY id DESC LIMIT 20'
     );
     return res.json({ success: true, count: rows.length, data: rows });
   } catch (err) {
