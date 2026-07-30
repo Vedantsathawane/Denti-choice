@@ -49,6 +49,29 @@ export const SettingsProvider = ({ children }) => {
     fetchSettings();
   }, [fetchSettings]);
 
+  useEffect(() => {
+    if (settings && settings.clinic_name) {
+      document.title = `${settings.clinic_name} - Dental Clinic Management System`;
+    }
+    if (settings) {
+      const body = document.body;
+      body.classList.remove('theme-modern', 'theme-elegant', 'theme-clinical');
+      const activeTheme = settings.website_theme || 'modern';
+      body.classList.add(`theme-${activeTheme}`);
+
+      if (settings.primary_color) {
+        document.documentElement.style.setProperty('--color-primary', settings.primary_color);
+        // Set basic variations
+        document.documentElement.style.setProperty('--color-primary-light', `${settings.primary_color}dd`);
+        document.documentElement.style.setProperty('--color-primary-dark', `${settings.primary_color}ff`);
+      }
+      if (settings.secondary_color) {
+        document.documentElement.style.setProperty('--color-secondary', settings.secondary_color);
+        document.documentElement.style.setProperty('--color-secondary-light', `${settings.secondary_color}dd`);
+      }
+    }
+  }, [settings]);
+
   return (
     <SettingsContext.Provider value={{ settings, loading, fetchSettings }}>
       {children}

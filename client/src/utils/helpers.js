@@ -6,7 +6,13 @@ export const formatTime = (time) => dayjs(`2000-01-01 ${time}`).format('h:mm A')
 export const formatDateTime = (date) => dayjs(date).format('MMM D, YYYY h:mm A');
 
 export const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  const numericAmount = Number(amount);
+  if (isNaN(numericAmount)) return amount;
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
+  }).format(numericAmount);
 };
 
 export const formatPhone = (phone) => {

@@ -15,6 +15,7 @@ import { useSocket } from '../../hooks/useSocket';
 import { notificationService } from '../../services/dataService';
 import { getInitials, getApiImageUrl } from '../../utils/helpers';
 import Swal from 'sweetalert2';
+import { useSettings } from '../../hooks/useSettings';
 
 dayjs.extend(relativeTime);
 
@@ -33,6 +34,7 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
+  const { settings } = useSettings();
   const navigate = useNavigate();
 
   // Notification States
@@ -160,7 +162,7 @@ const AdminLayout = () => {
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
               <FaTooth className="text-white text-sm" />
             </div>
-            <span className="font-bold text-lg gradient-text">Denti-Choice</span>
+            <span className="font-bold text-lg gradient-text">{settings?.clinic_name || 'Denti-Choice'}</span>
             <button onClick={() => setSidebarOpen(false)} className="lg:hidden ml-auto text-gray-500">
               <FaTimes />
             </button>

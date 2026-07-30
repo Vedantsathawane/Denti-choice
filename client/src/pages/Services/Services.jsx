@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaTooth, FaSyringe, FaStar, FaTeethOpen, FaCog, FaSmile, FaMagic, FaHandHoldingMedical, FaAmbulance, FaChild, FaClock, FaDollarSign, FaArrowRight } from 'react-icons/fa';
+import { FaTooth, FaSyringe, FaStar, FaTeethOpen, FaCog, FaSmile, FaMagic, FaHandHoldingMedical, FaAmbulance, FaChild, FaClock, FaRupeeSign, FaArrowRight } from 'react-icons/fa';
 import { serviceService } from '../../services/dataService';
+import { formatCurrency } from '../../utils/helpers';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const serviceIcons = { 'Teeth Cleaning': FaTooth, 'Root Canal': FaSyringe, 'Teeth Whitening': FaStar, 'Braces': FaTeethOpen, 'Dental Implant': FaCog, 'Smile Designing': FaSmile, 'Cosmetic Dentistry': FaMagic, 'Tooth Extraction': FaHandHoldingMedical, 'Emergency Dental Care': FaAmbulance, 'Pediatric Dentistry': FaChild };
@@ -67,7 +68,7 @@ const Services = () => {
 
                     <div className="flex items-center gap-4 mb-5 text-sm text-gray-500 dark:text-gray-400">
                       <span className="flex items-center gap-1.5"><FaClock className="text-primary" /> {service.duration}</span>
-                      <span className="flex items-center gap-1.5"><FaDollarSign className="text-primary" /> From ${service.price}</span>
+                      <span className="flex items-center gap-1.5"><FaRupeeSign className="text-primary" /> From {formatCurrency(service.price)}</span>
                     </div>
 
                     <Link

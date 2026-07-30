@@ -8,6 +8,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import { SocketProvider } from './context/SocketContext';
 import Layout from './components/layout/Layout';
 import AdminLayout from './components/layout/AdminLayout';
+import SuperAdminLayout from './components/layout/SuperAdminLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ScrollToTop from './components/common/ScrollToTop';
@@ -30,6 +31,16 @@ const TestimonialManagement = lazy(() => import('./pages/Dashboard/TestimonialMa
 const ContactMessages = lazy(() => import('./pages/Dashboard/ContactMessages'));
 const Settings = lazy(() => import('./pages/Dashboard/Settings'));
 const Profile = lazy(() => import('./pages/Dashboard/Profile'));
+
+// Super Admin pages
+const SuperAdminDashboard = lazy(() => import('./pages/super-admin/SuperAdminDashboard'));
+const ClinicManagement = lazy(() => import('./pages/super-admin/ClinicManagement'));
+const SubscriptionPlans = lazy(() => import('./pages/super-admin/SubscriptionPlans'));
+const Payments = lazy(() => import('./pages/super-admin/Payments'));
+const SupportTickets = lazy(() => import('./pages/super-admin/SupportTickets'));
+const AuditLogs = lazy(() => import('./pages/super-admin/AuditLogs'));
+const PlatformSettings = lazy(() => import('./pages/super-admin/PlatformSettings'));
+const SuperAdminWebsiteBuilder = lazy(() => import('./pages/super-admin/WebsiteBuilder'));
 
 function App() {
   return (
@@ -56,7 +67,7 @@ function App() {
                 <Route
                   path="/dashboard"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['owner', 'admin', 'receptionist', 'doctor']}>
                       <AdminLayout />
                     </ProtectedRoute>
                   }
@@ -69,6 +80,25 @@ function App() {
                   <Route path="messages" element={<ContactMessages />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="profile" element={<Profile />} />
+                </Route>
+
+                {/* Super Admin Routes */}
+                <Route
+                  path="/super-admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['super_admin']}>
+                      <SuperAdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="dashboard" element={<SuperAdminDashboard />} />
+                  <Route path="clinics" element={<ClinicManagement />} />
+                  <Route path="website-builder" element={<SuperAdminWebsiteBuilder />} />
+                  <Route path="subscriptions" element={<SubscriptionPlans />} />
+                  <Route path="payments" element={<Payments />} />
+                  <Route path="support" element={<SupportTickets />} />
+                  <Route path="settings" element={<PlatformSettings />} />
+                  <Route path="logs" element={<AuditLogs />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

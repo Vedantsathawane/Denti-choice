@@ -13,6 +13,9 @@ import { useSocket } from '../../hooks/useSocket';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { formatCurrency, formatTime, formatDateShort } from '../../utils/helpers';
 import { useTheme } from '../../hooks/useTheme';
+import AIDoctorAssistant from '../../components/common/AIDoctorAssistant';
+import AIDashboardAssistant from '../../components/common/AIDashboardAssistant';
+import AIAnalyticsPredict from '../../components/common/AIAnalyticsPredict';
 
 const BLUE_COLORS = ['#0077B6', '#00B4D8', '#90E0EF', '#0096D6', '#005A8C'];
 const PINK_COLORS = ['#DB2777', '#EC4899', '#F472B6', '#F43F5E', '#FDA4AF'];
@@ -376,6 +379,21 @@ const DashboardHome = () => {
               ))
             )}
           </div>
+        </motion.div>
+      </div>
+
+      {/* AI Doctor Assistant */}
+      <motion.div variants={itemVariants} className="mt-6">
+        <AIDoctorAssistant />
+      </motion.div>
+
+      {/* AI Dashboard Assistant & Predictive Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <motion.div variants={itemVariants}>
+          <AIDashboardAssistant />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <AIAnalyticsPredict />
         </motion.div>
       </div>
     </motion.div>

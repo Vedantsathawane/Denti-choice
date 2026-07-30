@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import BackToTop from '../common/BackToTop';
+import AIChatWidget from '../common/AIChatWidget';
 
 const Layout = () => {
   return (
@@ -11,6 +12,7 @@ const Layout = () => {
         <Outlet />
       </main>
       <Footer />
+      <AIChatWidget />
       <BackToTop />
     </div>
   );

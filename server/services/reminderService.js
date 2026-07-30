@@ -1,159 +1,168 @@
-const AppointmentModel = require('../models/appointmentModel');
-const EmailService = require('./emailService');
-const logger = require('../utils/logger');
 const { pool } = require('../config/db');
+const logger = require('../utils/logger');
+const NotificationServiceUpgrade = require('./notificationService');
 
 const ReminderService = {
   /**
-   * Get all upcoming appointments eligible for reminders (future, not sent, pending/confirmed status, booked >= 2 hours in advance)
+   * Fetch appointments due for 24-hour reminders
    */
-  async getUpcomingReminders() {
+  async getDue24hReminders() {
     const query = `
       SELECT a.*, 
              p.full_name as patient_name, p.email as patient_email, p.phone as patient_phone,
-             d.name as doctor_name, d.email as doctor_email, d.phone as doctor_phone,
+             d.name as doctor_name, d.email as doctor_email,
              s.name as service_name
       FROM appointments a
       JOIN patients p ON a.patient_id = p.id
       JOIN doctors d ON a.doctor_id = d.id
       JOIN services s ON a.service_id = s.id
       WHERE a.status IN ('pending', 'confirmed')
-        AND a.reminder_sent = 0
+        AND a.reminder_24h_sent = 0
         AND CONCAT(a.appointment_date, ' ', a.appointment_time) > NOW()
-        AND TIMESTAMPDIFF(MINUTE, a.created_at, CONCAT(a.appointment_date, ' ', a.appointment_time)) >= 120
-      ORDER BY a.appointment_date ASC, a.appointment_time ASC
+        AND TIMESTAMPDIFF(MINUTE, NOW(), CONCAT(a.appointment_date, ' ', a.appointment_time)) BETWEEN 1380 AND 1500
     `;
     const [rows] = await pool.query(query);
     return rows;
   },
 
   /**
-   * Get all pending reminders that are currently due (time for sending is now or past, but they are not sent yet)
+   * Fetch appointments due for 2-hour reminders
    */
-  async getPendingReminders() {
+  async getDue2hReminders() {
     const query = `
       SELECT a.*, 
              p.full_name as patient_name, p.email as patient_email, p.phone as patient_phone,
-             d.name as doctor_name, d.email as doctor_email, d.phone as doctor_phone,
+             d.name as doctor_name, d.email as doctor_email,
              s.name as service_name
       FROM appointments a
       JOIN patients p ON a.patient_id = p.id
       JOIN doctors d ON a.doctor_id = d.id
       JOIN services s ON a.service_id = s.id
       WHERE a.status IN ('pending', 'confirmed')
-        AND a.reminder_sent = 0
+        AND a.reminder_2h_sent = 0
         AND CONCAT(a.appointment_date, ' ', a.appointment_time) > NOW()
-        AND (
-          (
-            TIMESTAMPDIFF(HOUR, a.created_at, CONCAT(a.appointment_date, ' ', a.appointment_time)) >= 24
-            AND NOW() >= TIMESTAMPADD(HOUR, -24, CONCAT(a.appointment_date, ' ', a.appointment_time))
-          )
-          OR
-          (
-            TIMESTAMPDIFF(HOUR, a.created_at, CONCAT(a.appointment_date, ' ', a.appointment_time)) < 24
-            AND TIMESTAMPDIFF(MINUTE, a.created_at, CONCAT(a.appointment_date, ' ', a.appointment_time)) >= 120
-            AND NOW() >= TIMESTAMPADD(HOUR, -2, CONCAT(a.appointment_date, ' ', a.appointment_time))
-          )
-        )
-      ORDER BY a.appointment_date ASC, a.appointment_time ASC
+        AND TIMESTAMPDIFF(MINUTE, NOW(), CONCAT(a.appointment_date, ' ', a.appointment_time)) BETWEEN 90 AND 150
     `;
     const [rows] = await pool.query(query);
     return rows;
   },
 
   /**
-   * Send reminder for a specific appointment
+   * Fetch appointments due for 30-minute reminders
    */
-  async sendReminder(id) {
-    const appointment = await AppointmentModel.findById(id);
-    if (!appointment) {
-      return { success: false, status: 'not_found', message: 'Appointment not found' };
-    }
-
-    if (appointment.reminder_sent) {
-      logger.info(`Reminder for appointment #${id} skipped: already sent`);
-      return { success: false, status: 'already_sent', message: 'Reminder already sent' };
-    }
-
-    if (appointment.status === 'cancelled') {
-      logger.info(`Reminder for appointment #${id} skipped: Cancelled Appointment`);
-      return { success: false, status: 'cancelled', message: 'Skipped (Cancelled Appointment)' };
-    }
-
-    if (appointment.status === 'completed') {
-      logger.info(`Reminder for appointment #${id} skipped: Completed Appointment`);
-      return { success: false, status: 'completed', message: 'Skipped (Completed Appointment)' };
-    }
-
-    if (appointment.status !== 'pending' && appointment.status !== 'confirmed') {
-      return { success: false, status: 'invalid_status', message: `Cannot send reminder for status: ${appointment.status}` };
-    }
-
-    // Attempt sending email to patient (with retry once)
-    let emailSent = false;
-    let attempts = 0;
-    while (attempts < 2 && !emailSent) {
-      attempts++;
-      try {
-        emailSent = await EmailService.sendAppointmentReminder(appointment);
-      } catch (err) {
-        logger.error(`Error sending email attempt ${attempts} for appointment #${id}`, err);
-      }
-    }
-
-    if (!emailSent) {
-      logger.error(`Reminder email failed for appointment #${id} after 2 attempts`);
-      return { success: false, status: 'failed', message: 'Reminder sending failed' };
-    }
-
-    // Mark as sent
-    const now = new Date();
-    await AppointmentModel.update(id, {
-      reminder_sent: 1,
-      reminder_sent_at: now
-    });
-
-    logger.appointment(`Reminder Email Sent successfully for appointment #${id}`);
-
-    // Optional: Send reminder to doctor
-    try {
-      if (appointment.doctor_email) {
-        await EmailService.sendDoctorReminder(appointment);
-        logger.appointment(`Doctor reminder email sent for appointment #${id}`);
-      }
-    } catch (err) {
-      logger.error(`Failed to send optional doctor reminder for appointment #${id}`, err);
-    }
-
-    return { success: true, status: 'sent', message: 'Reminder Sent Successfully' };
+  async getDue30mReminders() {
+    const query = `
+      SELECT a.*, 
+             p.full_name as patient_name, p.email as patient_email, p.phone as patient_phone,
+             d.name as doctor_name, d.email as doctor_email,
+             s.name as service_name
+      FROM appointments a
+      JOIN patients p ON a.patient_id = p.id
+      JOIN doctors d ON a.doctor_id = d.id
+      JOIN services s ON a.service_id = s.id
+      WHERE a.status IN ('pending', 'confirmed')
+        AND a.reminder_30m_sent = 0
+        AND CONCAT(a.appointment_date, ' ', a.appointment_time) > NOW()
+        AND TIMESTAMPDIFF(MINUTE, NOW(), CONCAT(a.appointment_date, ' ', a.appointment_time)) BETWEEN 15 AND 45
+    `;
+    const [rows] = await pool.query(query);
+    return rows;
   },
 
   /**
-   * Send all pending reminders that are currently due
+   * Dispatch reminder alerts based on stage
+   */
+  async sendStagedReminder(appointment, stage) {
+    const clinicId = appointment.clinic_id || 1;
+    const patientEmail = appointment.patient_email || appointment.email;
+    const patientPhone = appointment.patient_phone || appointment.phone;
+    const patientName = appointment.patient_name || appointment.full_name;
+    const doctorName = appointment.doctor_name || 'Staff';
+    const dateStr = appointment.appointment_date;
+    const timeStr = appointment.appointment_time;
+
+    const data = {
+      patient_name: patientName,
+      clinic_name: appointment.clinic_name || 'Denti-Choice Clinic',
+      doctor_name: doctorName,
+      service_name: appointment.service_name || 'Treatment',
+      appointment_date: dateStr,
+      appointment_time: timeStr,
+      clinic_address: '123 Smile Street, Suite A',
+      review_link: `http://denti-choice.com/review?clinic_id=${clinicId}`
+    };
+
+    // Trigger Multi-channel dispatches via our notification service (non-blocking)
+    NotificationServiceUpgrade.triggerEvent(
+      clinicId,
+      appointment.patient_id,
+      patientEmail,
+      patientPhone,
+      'reminder',
+      data
+    );
+
+    // Mark as sent in DB
+    const colSent = `reminder_${stage}_sent`;
+    const colSentAt = `reminder_${stage}_sent_at`;
+    await pool.query(
+      `UPDATE appointments SET ${colSent} = 1, ${colSentAt} = NOW() WHERE id = ?`,
+      [appointment.id]
+    );
+
+    logger.info(`Staged reminder (${stage}) successfully processed for appointment #${appointment.id}`);
+  },
+
+  /**
+   * Scan and trigger reminders
    */
   async sendAllPendingReminders() {
-    const dueAppointments = await this.getPendingReminders();
-    logger.info(`Running sendAllPendingReminders: found ${dueAppointments.length} due appointments`);
-    
+    logger.info('Scanning for pending staged reminders...');
     let sentCount = 0;
     let failedCount = 0;
-    
-    for (const appt of dueAppointments) {
-      try {
-        const result = await this.sendReminder(appt.id);
-        if (result.success) {
+
+    try {
+      // 1. Process 24h reminders
+      const due24h = await this.getDue24hReminders();
+      for (const appt of due24h) {
+        try {
+          await this.sendStagedReminder(appt, '24h');
           sentCount++;
-        } else if (result.status === 'failed') {
+        } catch (e) {
+          logger.error(`Error sending 24h reminder for appointment #${appt.id}:`, e.message);
           failedCount++;
         }
-      } catch (error) {
-        failedCount++;
-        logger.error(`Error in sendAllPendingReminders for appointment #${appt.id}:`, error);
       }
+
+      // 2. Process 2h reminders
+      const due2h = await this.getDue2hReminders();
+      for (const appt of due2h) {
+        try {
+          await this.sendStagedReminder(appt, '2h');
+          sentCount++;
+        } catch (e) {
+          logger.error(`Error sending 2h reminder for appointment #${appt.id}:`, e.message);
+          failedCount++;
+        }
+      }
+
+      // 3. Process 30m reminders
+      const due30m = await this.getDue30mReminders();
+      for (const appt of due30m) {
+        try {
+          await this.sendStagedReminder(appt, '30m');
+          sentCount++;
+        } catch (e) {
+          logger.error(`Error sending 30m reminder for appointment #${appt.id}:`, e.message);
+          failedCount++;
+        }
+      }
+    } catch (error) {
+      logger.error('Error running scan for staged reminders:', error.message);
     }
 
     return {
-      totalFound: dueAppointments.length,
+      totalFound: sentCount + failedCount,
       sentCount,
       failedCount
     };

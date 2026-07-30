@@ -25,7 +25,7 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Get user from database
-    const [rows] = await pool.query('SELECT id, name, email, role FROM admins WHERE id = ? AND is_active = 1', [decoded.id]);
+    const [rows] = await pool.query('SELECT id, clinic_id, name, email, role FROM clinic_users WHERE id = ? AND is_active = 1', [decoded.id]);
 
     if (rows.length === 0) {
       return res.status(401).json({

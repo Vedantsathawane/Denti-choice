@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaPlus, FaSearch, FaEdit, FaTrash, FaCheck, FaTimes, FaDollarSign, FaClock,
+  FaPlus, FaSearch, FaEdit, FaTrash, FaCheck, FaTimes, FaRupeeSign, FaClock,
   FaTooth, FaSyringe, FaStar, FaTeethOpen, FaCog, FaSmile, FaMagic,
   FaHandHoldingMedical, FaAmbulance, FaChild
 } from 'react-icons/fa';
@@ -214,7 +214,7 @@ const ServiceManagement = () => {
                   {/* Meta stats */}
                   <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                     <span className="flex items-center gap-1.5"><FaClock className="text-primary" /> {ser.duration}</span>
-                    <span className="flex items-center gap-1.5"><FaDollarSign className="text-success" /> From {formatCurrency(ser.price)}</span>
+                    <span className="flex items-center gap-1.5"><FaRupeeSign className="text-success" /> From {formatCurrency(ser.price)}</span>
                   </div>
 
                   {/* Actions */}
@@ -303,7 +303,7 @@ const ServiceManagement = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Starting Price ($)</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Starting Price (Rs)</label>
                     <input
                       type="number"
                       value={price}
@@ -317,17 +317,31 @@ const ServiceManagement = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Select Icon Representative</label>
-                  <select
-                    value={icon}
-                    onChange={e => setIcon(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
-                    required
-                  >
-                    {Object.entries(AVAILABLE_ICONS).map(([key, val]) => (
-                      <option key={key} value={key}>{val.label}</option>
-                    ))}
-                  </select>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Select Icon Representative</label>
+                  <div className="grid grid-cols-5 gap-2 p-2 bg-gray-50 dark:bg-gray-950/40 rounded-2xl border border-gray-150 dark:border-gray-800/80">
+                    {Object.entries(AVAILABLE_ICONS).map(([key, val]) => {
+                      const IconComponent = val.icon;
+                      const isSelected = icon === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setIcon(key)}
+                          title={val.label}
+                          className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                            isSelected
+                              ? 'border-primary bg-primary/10 text-primary dark:bg-primary/20 scale-105 font-bold'
+                              : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-850 hover:text-gray-900 dark:hover:text-white'
+                          }`}
+                        >
+                          <IconComponent className="text-xl mb-1" />
+                          <span className="text-[10px] truncate max-w-full text-center leading-tight">
+                            {val.label.split(' (')[0]}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div>

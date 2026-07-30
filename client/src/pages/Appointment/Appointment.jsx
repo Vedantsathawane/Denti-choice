@@ -12,7 +12,7 @@ import { appointmentService, doctorService, serviceService } from '../../service
 import { useSocketEvent } from '../../hooks/useSocket';
 import { TIME_SLOTS, GENDER_OPTIONS } from '../../utils/constants';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { formatTime } from '../../utils/helpers';
+import { formatTime, formatCurrency } from '../../utils/helpers';
 
 const Appointment = () => {
   const location = useLocation();
@@ -209,7 +209,7 @@ const Appointment = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Service *</label>
                   <select {...register('service_id', { required: 'Please select a service' })} className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-transparent outline-none text-sm transition">
                     <option value="">Select Service</option>
-                    {services.map(s => <option key={s.id} value={String(s.id)}>{s.name} - ${s.price}</option>)}
+                    {services.map(s => <option key={s.id} value={String(s.id)}>{s.name} - {formatCurrency(s.price)}</option>)}
                   </select>
                   {errors.service_id && <p className="text-red-500 text-xs mt-1">{errors.service_id.message}</p>}
                 </div>

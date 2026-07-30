@@ -1,12 +1,14 @@
 const router = require('express').Router();
 const AppointmentController = require('../controllers/appointmentController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const { tenantMiddleware } = require('../middlewares/tenantMiddleware');
+const { checkLimit } = require('../middlewares/planLimitsMiddleware');
 const validate = require('../middlewares/validationMiddleware');
 const { appointmentValidator, statusValidator } = require('../validators');
 
 // Public routes
-router.post('/', appointmentValidator, validate, AppointmentController.book);
-router.get('/slots', AppointmentController.getSlots);
+router.post('/', tenantMiddleware, checkLimit('appointments'), appointmentValidator, validate, AppointmentController.book);
+router.get('/slots', tenantMiddleware, AppointmentController.getSlots);
 
 // Admin routes
 router.post('/all', authMiddleware, AppointmentController.getAll);

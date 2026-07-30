@@ -3,6 +3,7 @@ const AppointmentModel = require('../models/appointmentModel');
 const EmailService = require('./emailService');
 const SocketService = require('./socketService');
 const NotificationService = require('./notificationService');
+const NotificationCenterService = require('./notificationCenterService');
 const logger = require('../utils/logger');
 
 const AppointmentService = {
@@ -10,7 +11,7 @@ const AppointmentService = {
    * Book a new appointment with full workflow:
    * 1. Create/find patient
    * 2. Create appointment with transaction-based double-booking prevention
-   * 3. Send emails (patient, admin, doctor)
+   * 3. Send notifications (email, whatsapp, socket)
    * 4. Emit Socket.IO events
    * 5. Create notification
    */
@@ -42,11 +43,28 @@ const AppointmentService = {
     // 3. Get full appointment details
     const appointment = await AppointmentModel.findById(result.id);
 
-    // 4. Send emails (non-blocking)
-    // Disabled sendBookingConfirmation so patients only receive an email when their appointment is confirmed
-    // EmailService.sendBookingConfirmation(appointment).catch(e => logger.error('Email error', e));
+    // 4. Send emails & multi-channel notifications (non-blocking)
     EmailService.sendAdminNotification(appointment).catch(e => logger.error('Email error', e));
     EmailService.sendDoctorNewPatient(appointment).catch(e => logger.error('Email error', e));
+
+    const NotificationServiceUpgrade = require('./notificationService');
+    NotificationServiceUpgrade.triggerEvent(
+      appointment.clinic_id || 1,
+      appointment.patient_id,
+      appointment.patient_email || appointment.email,
+      appointment.patient_phone || appointment.phone,
+      'created',
+      {
+        patient_name: appointment.patient_name || appointment.full_name,
+        clinic_name: appointment.clinic_name || 'Denti-Choice Clinic',
+        doctor_name: appointment.doctor_name || 'Staff',
+        service_name: appointment.service_name || 'Treatment',
+        appointment_date: appointment.appointment_date,
+        appointment_time: appointment.appointment_time,
+        clinic_address: '123 Smile Street, Suite A',
+        review_link: `http://denti-choice.com/review?clinic_id=${appointment.clinic_id}`
+      }
+    );
 
     // 5. Emit Socket.IO events
     SocketService.emitAppointmentBooked(appointment);
@@ -71,28 +89,44 @@ const AppointmentService = {
     const appointment = await AppointmentModel.findById(id);
     if (!appointment) return false;
 
-    // Send appropriate emails based on status
-    switch (status) {
-      case 'confirmed':
-        EmailService.sendAppointmentConfirmed(appointment).catch(e => logger.error('Email error', e));
-        break;
-      case 'cancelled':
-        appointment.cancellation_reason = reason;
-        EmailService.sendAppointmentCancelled(appointment).catch(e => logger.error('Email error', e));
-        // Free up the slot
-        const bookedSlots = await AppointmentModel.getBookedSlots(appointment.doctor_id, appointment.appointment_date);
-        SocketService.emitSlotUpdate(appointment.doctor_id, appointment.appointment_date, bookedSlots);
-        break;
-      case 'completed':
-        EmailService.sendAppointmentCompleted(appointment).catch(e => logger.error('Email error', e));
-        break;
+    // Send appropriate emails & multi-channel notifications based on status
+    let eventType = 'confirmed';
+    if (status === 'cancelled') {
+      eventType = 'cancelled';
+      appointment.cancellation_reason = reason;
+      // Free up the slot
+      const bookedSlots = await AppointmentModel.getBookedSlots(appointment.doctor_id, appointment.appointment_date);
+      SocketService.emitSlotUpdate(appointment.doctor_id, appointment.appointment_date, bookedSlots);
+    } else if (status === 'completed') {
+      eventType = 'completed';
     }
+
+    // Trigger central notifications (WhatsApp, Email, Dashboard)
+    const NotificationServiceUpgrade = require('./notificationService');
+    NotificationServiceUpgrade.triggerEvent(
+      appointment.clinic_id || 1,
+      appointment.patient_id,
+      appointment.patient_email || appointment.email,
+      appointment.patient_phone || appointment.phone,
+      eventType,
+      {
+        patient_name: appointment.patient_name || appointment.full_name,
+        clinic_name: appointment.clinic_name || 'Denti-Choice Clinic',
+        doctor_name: appointment.doctor_name || 'Staff',
+        service_name: appointment.service_name || 'Treatment',
+        appointment_date: appointment.appointment_date,
+        appointment_time: appointment.appointment_time,
+        clinic_address: '123 Smile Street, Suite A',
+        cancellation_reason: reason,
+        review_link: `http://denti-choice.com/review?clinic_id=${appointment.clinic_id}`
+      }
+    );
 
     // Emit status change
     appointment.status = status;
     SocketService.emitStatusChange(appointment);
 
-    // Create notification
+    // Create legacy notification log
     NotificationService.appointmentStatusChanged(appointment, status).catch(e => logger.error('Notification error', e));
 
     return appointment;

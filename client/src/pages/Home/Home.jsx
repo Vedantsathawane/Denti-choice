@@ -14,7 +14,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import { testimonialService, doctorService, serviceService } from '../../services/dataService';
 import { useSettings } from '../../hooks/useSettings';
-import { getApiImageUrl } from '../../utils/helpers';
+import { getApiImageUrl, formatCurrency } from '../../utils/helpers';
 import { useSocketEvent } from '../../hooks/useSocket';
 
 // Animation variants
@@ -138,7 +138,7 @@ const Home = () => {
                 transition={{ delay: 0.3 }}
                 className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium mb-6"
               >
-                🦷 Welcome to Denti-Choice Dental Clinic
+                🦷 Welcome to {settings?.clinic_name || 'Denti-Choice Dental Clinic'}
               </motion.span>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
@@ -275,7 +275,7 @@ const Home = () => {
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{service.name}</h3>
                     <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4">{service.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-primary font-semibold">From ${service.price}</span>
+                      <span className="text-primary font-semibold">From {formatCurrency(service.price)}</span>
                       <span className="text-xs text-gray-400">{service.duration}</span>
                     </div>
                   </motion.div>
@@ -296,7 +296,7 @@ const Home = () => {
       <section className="section-padding bg-gray-50 dark:bg-gray-900">
         <div className="container-custom">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="text-center mb-14">
-            <span className="text-primary font-semibold text-sm uppercase tracking-wider">Why Denti-Choice</span>
+            <span className="text-primary font-semibold text-sm uppercase tracking-wider">Why {settings?.clinic_name || 'Denti-Choice'}</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4 text-gray-900 dark:text-white">Why Choose Us</h2>
             <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">We are committed to providing the highest quality dental care in a comfortable and welcoming environment.</p>
           </motion.div>
@@ -369,7 +369,7 @@ const Home = () => {
                 <span className="gradient-text"> Dental Health</span>
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                At Denti-Choice, we believe everyone deserves a beautiful, healthy smile. Founded over 15 years ago,
+                At {settings?.clinic_name || 'Denti-Choice'}, we believe everyone deserves a beautiful, healthy smile. Founded over 15 years ago,
                 our clinic has grown into one of the most trusted dental care providers in the region.
               </p>
               <p className="text-gray-600 dark:text-gray-400 mb-6">

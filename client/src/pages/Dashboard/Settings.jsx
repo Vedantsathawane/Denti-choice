@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaSave, FaClinicMedical, FaClock, FaMailBulk, FaGlobe, FaTimes } from 'react-icons/fa';
+import { FaSave, FaClinicMedical, FaClock, FaMailBulk, FaGlobe, FaTimes, FaLaptop, FaWhatsapp, FaWordpress } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { toastError } from '../../services/api';
 import { settingService } from '../../services/dataService';
 import { useSettings } from '../../hooks/useSettings';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import SaaSSettings from './SaaSSettings';
+import WhatsAppSettings from './WhatsAppSettings';
+import IntegrationSettings from './IntegrationSettings';
 
 const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -191,13 +194,59 @@ const Settings = () => {
           >
             <FaClock /> Available Time Slots
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('saas')}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-left transition-all cursor-pointer whitespace-nowrap lg:w-full ${
+              activeTab === 'saas'
+                ? 'gradient-primary text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <FaGlobe /> SaaS & AI Setup
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('whatsapp')}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-left transition-all cursor-pointer whitespace-nowrap lg:w-full ${
+              activeTab === 'whatsapp'
+                ? 'gradient-primary text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <FaWhatsapp /> WhatsApp Setup
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('integration')}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-left transition-all cursor-pointer whitespace-nowrap lg:w-full ${
+              activeTab === 'integration'
+                ? 'gradient-primary text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <FaWordpress /> WordPress & Embeds
+          </button>
         </div>
 
         {/* Tab content area */}
         <div className="flex-1 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-6 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {activeTab === 'general' && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+          {activeTab === 'saas' ? (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <SaaSSettings />
+            </motion.div>
+          ) : activeTab === 'whatsapp' ? (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <WhatsAppSettings />
+            </motion.div>
+          ) : activeTab === 'integration' ? (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <IntegrationSettings />
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {activeTab === 'general' && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-50 dark:border-gray-800 pb-2">
                   General Details
                 </h3>
@@ -471,15 +520,16 @@ const Settings = () => {
               </motion.div>
             )}
 
-            <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex justify-end">
-              <button
-                type="submit"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-primary text-white font-bold text-sm hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all cursor-pointer"
-              >
-                <FaSave /> Save Changes
-              </button>
-            </div>
-          </form>
+              <div className="border-t border-gray-100 dark:border-gray-800 pt-4 flex justify-end">
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-primary text-white font-bold text-sm hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all cursor-pointer"
+                >
+                  <FaSave /> Save Changes
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

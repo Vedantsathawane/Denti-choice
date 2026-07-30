@@ -19,9 +19,11 @@ const settingRoutes = require('./routes/settingRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const reminderRoutes = require('./routes/reminderRoutes');
+const aiRoutes = require('./ai/routes/aiRoutes');
 
 // Import middleware
 const { errorHandler, notFound } = require('./middlewares/errorMiddleware');
+const { centralizedErrorHandler, xssSanitizer } = require('./middlewares/tenantSecurity');
 
 const app = express();
 
@@ -35,7 +37,7 @@ app.use(cors({
   origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-clinic-id', 'x-clinic-subdomain']
 }));
 
 // Rate limiting
@@ -62,9 +64,23 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login', authLimiter);
 
+// Strict rate limit for AI endpoints to prevent denial-of-service / billing spikes
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50,
+  message: {
+    success: false,
+    message: 'Too many requests to the AI service. Please wait a bit before requesting again.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/ai', aiLimiter);
+
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(xssSanitizer);
 
 // Cookie parser
 app.use(cookieParser());
@@ -91,14 +107,24 @@ app.use('/api/settings', settingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/super-admin', require('./routes/superAdmin/superAdminRoutes'));
+app.use('/api/clinic', require('./routes/clinic/clinicRoutes'));
+app.use('/api/billing', require('./routes/clinic/billingRoutes'));
+app.use('/api/public/clinic', require('./routes/public/publicClinicRoutes'));
+
+// Setup Swagger Documentation
+const { setupSwagger } = require('./config/swagger');
+setupSwagger(app);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Denti-Choice API is running', timestamp: new Date().toISOString() });
+  res.json({ success: true, message: 'Dental Clinic API is running', timestamp: new Date().toISOString() });
 });
 
 // Error handling
 app.use(notFound);
 app.use(errorHandler);
+app.use(centralizedErrorHandler);
 
 module.exports = app;

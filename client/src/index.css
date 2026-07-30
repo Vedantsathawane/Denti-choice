@@ -532,3 +532,72 @@ select:-webkit-autofill:focus {
   -webkit-text-fill-color: #FFFFFF !important; /* Matches dark:text-white color */
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* ============================================
+   Dynamic Website Templates & Themes overrides
+   ============================================ */
+
+/* 1. Elegant Serif Template Overrides */
+body.theme-elegant {
+  font-family: 'Lora', 'Playfair Display', Georgia, serif;
+}
+
+body.theme-elegant h1,
+body.theme-elegant h2,
+body.theme-elegant h3,
+body.theme-elegant h4,
+body.theme-elegant h5,
+body.theme-elegant h6 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+body.theme-elegant .btn,
+body.theme-elegant button,
+body.theme-elegant a.inline-flex {
+  border-radius: 9999px !important; /* Elegant rounded pill buttons */
+}
+
+body.theme-elegant .rounded-2xl,
+body.theme-elegant .rounded-3xl {
+  border-radius: 12px !important; /* More classical and rigid border-radii for boxes */
+}
+
+/* 2. Clinical Trust Template Overrides */
+body.theme-clinical {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+}
+
+body.theme-clinical h1,
+body.theme-clinical h2,
+body.theme-clinical h3,
+body.theme-clinical h4,
+body.theme-clinical h5,
+body.theme-clinical h6 {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+body.theme-clinical .btn,
+body.theme-clinical button,
+body.theme-clinical a.inline-flex {
+  border-radius: 6px !important; /* Clean, medical/scientific small radius */
+}
+
+body.theme-clinical .rounded-2xl,
+body.theme-clinical .rounded-3xl {
+  border-radius: 8px !important; /* Clean medical grid layout look */
+}
+
+body.theme-clinical .bg-gradient-to-br {
+  /* Softer gradient for medical trust */
+  background-image: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%) !important;
+}
+
+/* 3. Modern Minimal Template Overrides (Default styling) */
+body.theme-modern {
+  font-family: var(--font-sans);
+}
+

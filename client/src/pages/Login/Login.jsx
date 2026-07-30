@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { FaTooth, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
+import { useSettings } from '../../hooks/useSettings';
 
 // Premium Holographic Tooth Scan SVG Illustration with Inline CSS Keyframes
 const HolographicToothScan = () => (
@@ -207,6 +208,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated } = useAuth();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -215,9 +217,14 @@ const Login = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      await login(data.email, data.password, data.remember);
+      const res = await login(data.email, data.password, data.remember);
       toast.success('🎉 Welcome back!');
-      navigate('/dashboard');
+      
+      if (res.data?.user?.role === 'super_admin') {
+        navigate('/super-admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally {
@@ -256,13 +263,13 @@ const Login = () => {
               <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
                 <FaTooth className="text-white text-base" />
               </div>
-              <span className="text-lg font-bold text-white tracking-wide">Denti-Choice</span>
+              <span className="text-lg font-bold text-white tracking-wide">{settings?.clinic_name || 'Denti-Choice'}</span>
             </div>
             
             {/* Form Headers */}
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                Welcome to Denti-Choice's hub
+                Welcome to {settings?.clinic_name || 'Denti-Choice'}'s hub
               </h1>
               <p className="text-sm text-slate-400 mt-2 font-medium">Sign into your account</p>
             </div>

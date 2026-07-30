@@ -144,7 +144,7 @@ const Footer = () => {
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
         <div className="container-custom py-7 flex flex-col md:flex-row justify-between items-center gap-3 text-sm">
-          <p>© {currentYear} Denti-Choice. All rights reserved.</p>
+          <p>© {currentYear} {settings.clinic_name || 'Denti-Choice'}. All rights reserved.</p>
           <p className="text-gray-400 text-center font-medium">
             Made by <span className="font-semibold text-white hover:text-gray-300 transition-colors cursor-default">Vedant Sathawane & Team</span>
           </p>

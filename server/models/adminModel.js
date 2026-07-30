@@ -3,20 +3,20 @@ const bcrypt = require('bcryptjs');
 
 const AdminModel = {
   async findByEmail(email) {
-    const [rows] = await pool.query('SELECT * FROM admins WHERE email = ?', [email]);
+    const [rows] = await pool.query('SELECT * FROM clinic_users WHERE email = ?', [email]);
     return rows[0] || null;
   },
 
   async findById(id) {
-    const [rows] = await pool.query('SELECT id, name, email, role, avatar, is_active, last_login, created_at FROM admins WHERE id = ?', [id]);
+    const [rows] = await pool.query('SELECT id, clinic_id, name, email, role, avatar, is_active, last_login, created_at FROM clinic_users WHERE id = ?', [id]);
     return rows[0] || null;
   },
 
   async create(data) {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const [result] = await pool.query(
-      'INSERT INTO admins (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [data.name, data.email, hashedPassword, data.role || 'admin']
+      'INSERT INTO clinic_users (clinic_id, name, email, password, role) VALUES (?, ?, ?, ?, ?)',
+      [data.clinic_id || null, data.name, data.email, hashedPassword, data.role || 'admin']
     );
     return result.insertId;
   },
@@ -32,18 +32,18 @@ const AdminModel = {
     if (fields.length === 0) return false;
 
     values.push(id);
-    await pool.query(`UPDATE admins SET ${fields.join(', ')} WHERE id = ?`, values);
+    await pool.query(`UPDATE clinic_users SET ${fields.join(', ')} WHERE id = ?`, values);
     return true;
   },
 
   async updatePassword(id, newPassword) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE admins SET password = ? WHERE id = ?', [hashedPassword, id]);
+    await pool.query('UPDATE clinic_users SET password = ? WHERE id = ?', [hashedPassword, id]);
     return true;
   },
 
   async updateLastLogin(id) {
-    await pool.query('UPDATE admins SET last_login = NOW() WHERE id = ?', [id]);
+    await pool.query('UPDATE clinic_users SET last_login = NOW() WHERE id = ?', [id]);
   },
 
   async comparePassword(plainPassword, hashedPassword) {

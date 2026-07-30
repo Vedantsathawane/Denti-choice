@@ -134,6 +134,29 @@ const AppointmentController = {
 
       await AppointmentModel.update(id, req.body);
       const updated = await AppointmentModel.findById(id);
+
+      // Trigger reschedule notification if date/time is changed
+      if (req.body.appointment_date || req.body.appointment_time) {
+        const NotificationServiceUpgrade = require('../services/notificationService');
+        NotificationServiceUpgrade.triggerEvent(
+          updated.clinic_id || 1,
+          updated.patient_id,
+          updated.patient_email || updated.email,
+          updated.patient_phone || updated.phone,
+          'rescheduled',
+          {
+            patient_name: updated.patient_name || updated.full_name,
+            clinic_name: updated.clinic_name || 'Denti-Choice Clinic',
+            doctor_name: updated.doctor_name || 'Staff',
+            service_name: updated.service_name || 'Treatment',
+            appointment_date: updated.appointment_date,
+            appointment_time: updated.appointment_time,
+            clinic_address: '123 Smile Street, Suite A',
+            review_link: `http://denti-choice.com/review?clinic_id=${updated.clinic_id}`
+          }
+        );
+      }
+
       return success(res, updated, 'Appointment updated successfully');
     } catch (err) { next(err); }
   },
