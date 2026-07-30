@@ -28,6 +28,31 @@ const runMigration = async () => {
       console.log('✅ Reminder columns already exist in appointments table.');
     }
 
+    // Check if patient_id column exists in notification_history
+    const [notifCols] = await pool.query(`
+      SELECT COLUMN_NAME 
+      FROM INFORMATION_SCHEMA.COLUMNS 
+      WHERE TABLE_SCHEMA = ? 
+        AND TABLE_NAME = 'notification_history' 
+        AND COLUMN_NAME = 'patient_id'
+    `, [dbName]);
+
+    if (notifCols.length === 0) {
+      console.log('ℹ️ Migrating notification_history table with extended columns...');
+      await pool.query(`
+        ALTER TABLE notification_history 
+        ADD COLUMN patient_id INT NULL DEFAULT NULL AFTER clinic_id,
+        ADD COLUMN type VARCHAR(50) NULL DEFAULT NULL AFTER channel,
+        ADD COLUMN provider_response TEXT NULL DEFAULT NULL AFTER error_message,
+        ADD COLUMN sent_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER provider_response,
+        ADD COLUMN delivery_time DATETIME NULL DEFAULT NULL AFTER sent_time,
+        ADD CONSTRAINT fk_notif_history_patient FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL
+      `);
+      console.log('✅ notification_history table migrated successfully.');
+    } else {
+      console.log('✅ Extended columns already exist in notification_history table.');
+    }
+
     console.log('🔄 Running SaaS Database Migrations...');
     
     const querySafe = async (query) => {
