@@ -141,6 +141,56 @@ const BillingController = {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       return res.redirect(`${frontendUrl}/dashboard/settings?payment=success`);
     } catch (err) { next(err); }
+  },
+
+  /**
+   * Fetch current subscription limits, status, and active consumption counts
+   */
+  async getUsageStats(req, res, next) {
+    try {
+      const clinicId = req.clinicId || 1;
+      const FeatureAccessService = require('../../services/featureAccessService');
+
+      // 1. Get resolved limits
+      const subInfo = await FeatureAccessService.getClinicLimits(clinicId);
+
+      // 2. Fetch actual consumption counts
+      const [rows] = await pool.query('SELECT * FROM feature_usage WHERE clinic_id = ?', [clinicId]);
+      const usage = rows[0] || {
+        appointments_count: 0,
+        doctors_count: 0,
+        staff_count: 0,
+        ai_requests_count: 0,
+        whatsapp_messages_count: 0,
+        emails_count: 0,
+        storage_bytes: 0
+      };
+
+      // 3. Count trial remaining days
+      let trialRemainingDays = 0;
+      if (subInfo.status === 'trialing' && subInfo.trialEnd) {
+        const diffTime = new Date(subInfo.trialEnd) - new Date();
+        trialRemainingDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+      }
+
+      return success(res, {
+        planId: subInfo.planId,
+        status: subInfo.status,
+        trialEnd: subInfo.trialEnd,
+        periodEnd: subInfo.periodEnd,
+        trialRemainingDays,
+        limits: subInfo.limits,
+        usage: {
+          appointments: usage.appointments_count,
+          doctors: usage.doctors_count,
+          staff: usage.staff_count,
+          ai_requests: usage.ai_requests_count,
+          whatsapp_messages: usage.whatsapp_messages_count,
+          emails: usage.emails_count,
+          storage_mb: parseFloat((usage.storage_bytes / (1024 * 1024)).toFixed(2))
+        }
+      }, 'SaaS usage details resolved successfully');
+    } catch (err) { next(err); }
   }
 };
 

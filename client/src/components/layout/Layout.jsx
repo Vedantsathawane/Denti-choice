@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import BackToTop from '../common/BackToTop';
 import AIChatWidget from '../common/AIChatWidget';
+import WhatsAppButton from '../common/WhatsAppButton';
 
 const Layout = () => {
   return (
@@ -13,6 +14,7 @@ const Layout = () => {
       </main>
       <Footer />
       <AIChatWidget />
+      <WhatsAppButton />
       <BackToTop />
     </div>
   );

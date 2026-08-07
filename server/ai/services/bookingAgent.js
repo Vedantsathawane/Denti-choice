@@ -382,15 +382,19 @@ const receptionistTools = {
   }
 };
 
+const ClinicSettingModel = require('../../models/clinic/clinicSettingModel');
+
 const bookingAgent = {
   chat: async ({ clinicId, messages, onChunk, onFinish }) => {
     try {
-      // 1. Fetch clinic details
+      // 1. Fetch clinic details & settings
       let clinicName = 'Denti-Choice';
       const [clinicRows] = await pool.query('SELECT name FROM clinics WHERE id = ?', [clinicId]);
       if (clinicRows.length > 0) {
         clinicName = clinicRows[0].name;
       }
+
+      const settings = await ClinicSettingModel.getSettings(clinicId);
 
       // 2. Fetch doctors in clinic roster
       const [doctorRows] = await pool.query(
@@ -410,7 +414,7 @@ const bookingAgent = {
         [clinicId]
       );
 
-      // 4. Construct System Prompt
+      // 4. Construct System Prompt incorporating settings, business hours, and FAQs
       const systemPrompt = `
 You are the professional AI Receptionist for "${clinicName}". Your objective is to help patients interact with the clinic.
 
@@ -427,6 +431,12 @@ Roster Data Summary:
 Doctors: ${JSON.stringify(doctorRows)}
 Services: ${JSON.stringify(serviceRows)}
 
+Clinic Information & Policies:
+- Address: ${settings.clinic_address || '123 Smile Street, Suite A'}
+- Phone: ${settings.clinic_phone || 'N/A'}
+- Business Hours: ${settings.business_hours || 'Mon-Fri: 09:00 - 17:00'}
+- Policies & FAQs: ${settings.clinic_policies || 'Standard dental procedures, cancellation policy requires 24h notice. Emergency walk-ins accepted.'}
+
 Guidelines:
 - **Conversation Memory**: Pay close attention to what the patient states (like their name, desired doctor, appointment ID). Keep track of it in context.
 - **Do not generate fake data**: Always use the available tools to check directories, availabilities, or verify items. Do not assume or hallucinate patient IDs or slots.
@@ -437,6 +447,7 @@ Guidelines:
   4. Call \`bookAppointment\` with the \`patientId\` and chosen time.
   5. State confirmation details (date, time, doctor) clearly.
 - **Reschedules / Cancellations**: Retrieve details from tool calls first, then execute updates.
+- **Medical Boundaries**: Answer questions about services, hours, prices, and policies using the provided clinic-specific data. Guide patients to book appointments or suggest appropriate doctors. If the patient asks for medical diagnoses, symptoms, or definitive medical advice, politely state that you are a virtual assistant and escalate/refer them to the clinical team or human staff. Do not invent diagnoses.
 
 Always respond in a professional and clinical tone.
 `;

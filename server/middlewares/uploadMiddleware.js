@@ -4,7 +4,13 @@ const path = require('path');
 // Storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '..', 'uploads'));
+    const fs = require('fs');
+    const clinicId = req.user?.clinic_id || req.clinicId || 1;
+    const destDir = path.join(__dirname, '..', 'uploads', `clinic_${clinicId}`);
+    if (!fs.existsSync(destDir)) {
+      fs.mkdirSync(destDir, { recursive: true });
+    }
+    cb(null, destDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);

@@ -192,6 +192,23 @@ const aiController = {
     }
   },
 
+  // 6.1 AI WhatsApp Assistant Reply Generator
+  handleWhatsAppGenerate: async (req, res, next) => {
+    try {
+      const { type, patientName, details } = req.body;
+      const clinicId = req.clinicId || 1;
+
+      if (!type || !patientName) {
+        return res.status(400).json({ success: false, message: 'Type and patientName are required.' });
+      }
+
+      const messageText = await messagingService.generateWhatsAppReply({ clinicId, type, patientName, details });
+      res.json({ success: true, messageText });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   // 7. AI Notification urgencies and sentiments
   handleNotificationAnalyze: async (req, res, next) => {
     try {
@@ -268,11 +285,23 @@ const aiController = {
       if (body.object && body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages) {
         const messageVal = body.entry[0].changes[0].value.messages[0];
         const fromPhone = messageVal.from; // Patient's phone number
-        const messageText = messageVal.text?.body || ''; // Text body
         const profileName = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name || 'Patient';
 
+        // Support standard text, interactive buttons, quick replies, or location messages
+        let messageText = '';
+        if (messageVal.type === 'text') {
+          messageText = messageVal.text?.body || '';
+        } else if (messageVal.type === 'interactive') {
+          const interactive = messageVal.interactive;
+          messageText = interactive.button_reply?.title || interactive.list_reply?.title || '';
+        } else if (messageVal.type === 'button') {
+          messageText = messageVal.button?.text || '';
+        } else if (messageVal.type === 'location' && messageVal.location) {
+          messageText = `[Location Shared - Latitude: ${messageVal.location.latitude}, Longitude: ${messageVal.location.longitude}]`;
+        }
+
         if (!messageText) {
-          return res.status(200).json({ success: true, message: 'Non-text message skipped.' });
+          return res.status(200).json({ success: true, message: 'Non-compatible message type skipped.' });
         }
 
         console.log(`💬 WhatsApp Msg Received from ${profileName} (${fromPhone}): "${messageText}"`);
@@ -347,6 +376,45 @@ const aiController = {
     } catch (error) {
       console.error('WhatsApp handler error:', error);
       res.status(500).json({ success: false, message: 'Failed to process message.' });
+    }
+  },
+
+  // 11. Handle Patient History Summary
+  handlePatientHistory: async (req, res, next) => {
+    try {
+      const { patientId } = req.params;
+      const clinicId = req.clinicId || 1;
+      const summary = await docAssistantService.summarizePatientHistory({ clinicId, patientId: parseInt(patientId) });
+      res.json({ success: true, summary });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // 12. Handle Follow-up and Admin suggestions
+  handleFollowUpRecommendations: async (req, res, next) => {
+    try {
+      const { appointmentId } = req.params;
+      const clinicId = req.clinicId || 1;
+      const followup = await docAssistantService.generateFollowUpRecommendations({ clinicId, appointmentId: parseInt(appointmentId) });
+      res.json({ success: true, followup });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // 13. Handle Patient Communication draft
+  handlePatientCommunication: async (req, res, next) => {
+    try {
+      const { appointmentId, channel } = req.body;
+      const clinicId = req.clinicId || 1;
+      if (!appointmentId || !channel) {
+        return res.status(400).json({ success: false, message: 'appointmentId and channel are required.' });
+      }
+      const draft = await docAssistantService.draftPatientCommunication({ clinicId, appointmentId: parseInt(appointmentId), channel });
+      res.json({ success: true, draft });
+    } catch (error) {
+      next(error);
     }
   }
 };

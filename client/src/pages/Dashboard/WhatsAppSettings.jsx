@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { FaSave, FaWhatsapp, FaKey, FaQuestionCircle } from 'react-icons/fa';
 import api, { toastError } from '../../services/api';
 import Swal from 'sweetalert2';
@@ -76,13 +77,21 @@ export default function WhatsAppSettings() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6 max-w-4xl"
     >
-      <div>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <FaWhatsapp className="text-emerald-500 text-2xl" /> Meta WhatsApp Business Integration
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Configure clinic-specific Meta Cloud API details to send automated booking confirmations and notifications to patients.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <FaWhatsapp className="text-emerald-500 text-2xl" /> Meta WhatsApp Business Integration
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Configure clinic-specific Meta Cloud API details to send automated booking confirmations and notifications to patients.
+          </p>
+        </div>
+        <Link
+          to="/dashboard/whatsapp"
+          className="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 self-start sm:self-center"
+        >
+          <span>WhatsApp Management Hub</span> →
+        </Link>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">

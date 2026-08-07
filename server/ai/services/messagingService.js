@@ -112,6 +112,36 @@ Provide the response in clean, premium HTML format suitable for sending.
       console.error('messagingService contact message analysis error:', error);
       return { sentiment: 'neutral', isUrgent: false, error: error.message };
     }
+  },
+
+  // 4. AI WhatsApp reply draft generator
+  generateWhatsAppReply: async ({ clinicId, type, patientName, details }) => {
+    try {
+      let clinicName = 'Denti-Choice';
+      const [clinicRows] = await pool.query('SELECT name FROM clinics WHERE id = ?', [clinicId]);
+      if (clinicRows.length > 0) {
+        clinicName = clinicRows[0].name;
+      }
+
+      const system = `You are a communications specialist for "${clinicName}". Generate a polished, friendly, E.164-compatible text draft to send to the patient via WhatsApp. Output only the plain text message without metadata.`;
+      const prompt = `
+Generate a friendly WhatsApp response of type: "${type}".
+- Patient Name: ${patientName}
+- Details: ${JSON.stringify(details)}
+`;
+
+      const response = await generateAiText({
+        clinicId,
+        system,
+        prompt,
+        responseFormat: 'text'
+      });
+
+      return response;
+    } catch (error) {
+      console.error('messagingService whatsapp reply helper error:', error);
+      throw error;
+    }
   }
 };
 

@@ -8,7 +8,9 @@ router.get('/mock-checkout-portal', BillingController.getMockPortal);
 router.post('/mock-checkout-portal/complete', BillingController.completeMockPayment);
 
 // Authenticated billing routes
-router.use(authMiddleware, tenantMiddleware);
+const { tenantIsolationGuard } = require('../../middlewares/tenantSecurity');
+router.use(authMiddleware, tenantMiddleware, tenantIsolationGuard);
+router.get('/usage', BillingController.getUsageStats);
 router.post('/checkout', BillingController.createCheckout);
 router.get('/coupons/validate', BillingController.validateCoupon);
 router.get('/invoices', BillingController.getInvoices);

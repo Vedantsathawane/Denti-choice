@@ -44,6 +44,16 @@ const AuthController = {
       };
       res.cookie('token', token, cookieOptions);
 
+      const AuditLogger = require('../services/auditLogger');
+      await AuditLogger.log({
+        clinicId: admin.clinic_id,
+        userId: admin.id,
+        actionType: 'LOGIN',
+        description: `User "${admin.name}" (${admin.email}) logged in successfully.`,
+        ipAddress: req.ip || '127.0.0.1',
+        userAgent: req.headers['user-agent'] || 'Unknown'
+      });
+
       return success(res, {
         token,
         user: {
@@ -64,6 +74,17 @@ const AuthController = {
    * POST /api/auth/logout
    */
   async logout(req, res) {
+    const AuditLogger = require('../services/auditLogger');
+    if (req.user) {
+      await AuditLogger.log({
+        clinicId: req.user.clinic_id,
+        userId: req.user.id,
+        actionType: 'LOGOUT',
+        description: `User with ID ${req.user.id} logged out.`,
+        ipAddress: req.ip || '127.0.0.1',
+        userAgent: req.headers['user-agent'] || 'Unknown'
+      });
+    }
     res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
     return success(res, null, 'Logged out successfully');
   },
@@ -97,6 +118,17 @@ const AuthController = {
 
       await AdminModel.updateProfile(req.user.id, { name, email, avatar });
       const updatedAdmin = await AdminModel.findById(req.user.id);
+      
+      const AuditLogger = require('../services/auditLogger');
+      await AuditLogger.log({
+        clinicId: req.user.clinic_id,
+        userId: req.user.id,
+        actionType: 'PROFILE_UPDATE',
+        description: `User updated profile information: Name = ${name}, Email = ${email}`,
+        ipAddress: req.ip || '127.0.0.1',
+        userAgent: req.headers['user-agent'] || 'Unknown'
+      });
+
       return success(res, updatedAdmin, 'Profile updated successfully');
     } catch (err) {
       next(err);
@@ -117,6 +149,17 @@ const AuthController = {
       }
 
       await AdminModel.updatePassword(req.user.id, newPassword);
+      
+      const AuditLogger = require('../services/auditLogger');
+      await AuditLogger.log({
+        clinicId: req.user.clinic_id,
+        userId: req.user.id,
+        actionType: 'PASSWORD_CHANGE',
+        description: `User changed account password successfully.`,
+        ipAddress: req.ip || '127.0.0.1',
+        userAgent: req.headers['user-agent'] || 'Unknown'
+      });
+
       return success(res, null, 'Password changed successfully');
     } catch (err) {
       next(err);

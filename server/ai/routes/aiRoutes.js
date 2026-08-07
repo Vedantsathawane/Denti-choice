@@ -58,7 +58,8 @@ router.post(
 );
 
 // Protected AI Routes (requires staff authentication & resolves clinic)
-router.use(authMiddleware, tenantMiddleware, checkLimit('ai'));
+const { tenantIsolationGuard } = require('../../middlewares/tenantSecurity');
+router.use(authMiddleware, tenantMiddleware, tenantIsolationGuard, checkLimit('ai'));
 
 router.post(
   '/doctor/chart', 
@@ -68,6 +69,11 @@ router.post(
 router.get('/doctor/chart/:appointmentId', aiController.handleGetSoapChart);
 router.put('/doctor/chart/:id', aiController.handleUpdateSoapChart);
 router.post('/doctor/upload', upload.single('file'), aiController.handleDoctorUpload);
+
+// New Doctor Dashboard AI endpoints
+router.get('/doctor/history/:patientId', aiController.handlePatientHistory);
+router.get('/doctor/followup/:appointmentId', aiController.handleFollowUpRecommendations);
+router.post('/doctor/communication', aiController.handlePatientCommunication);
 
 router.post(
   '/treatment/plan', 
@@ -88,6 +94,11 @@ router.post(
   '/email/generate', 
   validateBody(aiValidator.emailGenerateSchema), 
   aiController.handleEmailGenerate
+);
+router.post(
+  '/whatsapp/generate', 
+  validateBody(aiValidator.emailGenerateSchema), 
+  aiController.handleWhatsAppGenerate
 );
 router.post(
   '/notification/analyze', 

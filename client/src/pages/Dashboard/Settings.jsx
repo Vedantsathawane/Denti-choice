@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaSave, FaClinicMedical, FaClock, FaMailBulk, FaGlobe, FaTimes, FaLaptop, FaWhatsapp, FaWordpress } from 'react-icons/fa';
+import { FaSave, FaClinicMedical, FaClock, FaMailBulk, FaGlobe, FaTimes, FaLaptop, FaWhatsapp, FaWordpress, FaPalette } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { toastError } from '../../services/api';
@@ -8,8 +8,8 @@ import { settingService } from '../../services/dataService';
 import { useSettings } from '../../hooks/useSettings';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import SaaSSettings from './SaaSSettings';
-import WhatsAppSettings from './WhatsAppSettings';
 import IntegrationSettings from './IntegrationSettings';
+import BrandingSettings from './BrandingSettings';
 
 const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -207,17 +207,6 @@ const Settings = () => {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('whatsapp')}
-            className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-left transition-all cursor-pointer whitespace-nowrap lg:w-full ${
-              activeTab === 'whatsapp'
-                ? 'gradient-primary text-white shadow-md'
-                : 'text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }`}
-          >
-            <FaWhatsapp /> WhatsApp Setup
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveTab('integration')}
             className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-left transition-all cursor-pointer whitespace-nowrap lg:w-full ${
               activeTab === 'integration'
@@ -227,17 +216,28 @@ const Settings = () => {
           >
             <FaWordpress /> WordPress & Embeds
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('branding')}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-left transition-all cursor-pointer whitespace-nowrap lg:w-full ${
+              activeTab === 'branding'
+                ? 'gradient-primary text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <FaPalette /> White-Label & Branding
+          </button>
         </div>
 
         {/* Tab content area */}
         <div className="flex-1 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-6 shadow-sm">
-          {activeTab === 'saas' ? (
+          {activeTab === 'branding' ? (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <BrandingSettings />
+            </motion.div>
+          ) : activeTab === 'saas' ? (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <SaaSSettings />
-            </motion.div>
-          ) : activeTab === 'whatsapp' ? (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <WhatsAppSettings />
             </motion.div>
           ) : activeTab === 'integration' ? (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

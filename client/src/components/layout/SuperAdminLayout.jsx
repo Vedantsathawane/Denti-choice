@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaTooth, FaChartPie, FaBuilding, FaCreditCard, FaQuestionCircle,
-  FaCog, FaSignOutAlt, FaBars, FaTimes, FaMoon, FaSun, FaHistory, FaLaptop
+  FaCog, FaSignOutAlt, FaBars, FaTimes, FaMoon, FaSun, FaHistory, FaLaptop, FaRobot, FaWhatsapp, FaPalette
 } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
@@ -12,6 +12,10 @@ import Swal from 'sweetalert2';
 const superAdminLinks = [
   { name: 'Dashboard', path: '/super-admin/dashboard', icon: FaChartPie, end: true },
   { name: 'Clinics', path: '/super-admin/clinics', icon: FaBuilding },
+  { name: 'AI Insights', path: '/super-admin/ai-insights', icon: FaRobot },
+  { name: 'WhatsApp', path: '/super-admin/whatsapp', icon: FaWhatsapp },
+  { name: 'Billing Control', path: '/super-admin/billing', icon: FaCreditCard },
+  { name: 'Branding Manager', path: '/super-admin/branding', icon: FaPalette },
   { name: 'Website Builder', path: '/super-admin/website-builder', icon: FaLaptop },
   { name: 'Subscriptions', path: '/super-admin/subscriptions', icon: FaCreditCard },
   { name: 'Payments', path: '/super-admin/payments', icon: FaCreditCard },

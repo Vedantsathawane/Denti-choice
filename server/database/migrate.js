@@ -113,6 +113,66 @@ const runMigration = async () => {
       console.log('✅ SaaS Extended tables and columns created or verified.');
     }
 
+    // Load saas_whatsapp_upgrade.sql
+    const saasWhatsappPath = path.join(__dirname, 'saas_whatsapp_upgrade.sql');
+    if (fs.existsSync(saasWhatsappPath)) {
+      const queries = fs.readFileSync(saasWhatsappPath, 'utf8')
+        .split(';')
+        .map(q => q.trim())
+        .filter(q => q.length > 0);
+        
+      for (const query of queries) {
+        const cleanQuery = query.split('\n')
+          .filter(line => !line.trim().startsWith('--'))
+          .join('\n')
+          .trim();
+        if (cleanQuery) {
+          await querySafe(cleanQuery);
+        }
+      }
+      console.log('✅ SaaS WhatsApp tables and columns created or verified.');
+    }
+
+    // Load saas_billing_upgrade.sql
+    const saasBillingPath = path.join(__dirname, 'saas_billing_upgrade.sql');
+    if (fs.existsSync(saasBillingPath)) {
+      const queries = fs.readFileSync(saasBillingPath, 'utf8')
+        .split(';')
+        .map(q => q.trim())
+        .filter(q => q.length > 0);
+        
+      for (const query of queries) {
+        const cleanQuery = query.split('\n')
+          .filter(line => !line.trim().startsWith('--'))
+          .join('\n')
+          .trim();
+        if (cleanQuery) {
+          await querySafe(cleanQuery);
+        }
+      }
+      console.log('✅ SaaS Billing tables and columns created or verified.');
+    }
+
+    // Load saas_branding_upgrade.sql
+    const saasBrandingPath = path.join(__dirname, 'saas_branding_upgrade.sql');
+    if (fs.existsSync(saasBrandingPath)) {
+      const queries = fs.readFileSync(saasBrandingPath, 'utf8')
+        .split(';')
+        .map(q => q.trim())
+        .filter(q => q.length > 0);
+        
+      for (const query of queries) {
+        const cleanQuery = query.split('\n')
+          .filter(line => !line.trim().startsWith('--'))
+          .join('\n')
+          .trim();
+        if (cleanQuery) {
+          await querySafe(cleanQuery);
+        }
+      }
+      console.log('✅ SaaS Branding tables and columns created or verified.');
+    }
+
     // Seed default clinic (ID = 1) if not exists
     const [clinics] = await pool.query('SELECT id FROM clinics WHERE id = 1');
     if (clinics.length === 0) {

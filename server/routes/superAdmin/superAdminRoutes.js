@@ -35,4 +35,18 @@ router.get('/payments', SuperAdminController.getPayments);
 router.get('/settings', SuperAdminController.getSettings);
 router.put('/settings', SuperAdminController.updateSettings);
 
+// AI & Announcements Broadcast endpoints
+router.post('/ai/insights', SuperAdminController.askPlatformAi);
+router.post('/notifications/broadcast', SuperAdminController.broadcastNotification);
+
+// Global WhatsApp stats
+router.get('/whatsapp/stats', SuperAdminController.getGlobalWhatsAppStats);
+
+// Subscription & Billing operators routes
+router.get('/plans', SuperAdminController.getSubscriptionPlans);
+router.post('/plans', SuperAdminController.saveSubscriptionPlan);
+router.post('/subscriptions/update', SuperAdminController.updateSubscriptionStatus);
+router.get('/billing/revenue-report', SuperAdminController.getGlobalRevenueReport);
+router.get('/performance/monitoring', SuperAdminController.getMonitoringStats);
+
 module.exports = router;

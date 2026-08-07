@@ -248,6 +248,367 @@ const SuperAdminController = {
       const settings = await ClinicSettingModel.getSettings(id);
       return success(res, settings, 'Clinic settings updated successfully');
     } catch (err) { next(err); }
+  },
+
+  // 9. Super Admin BI AI insights conversational query
+  async askPlatformAi(req, res, next) {
+    try {
+      const { question } = req.body;
+      if (!question) {
+        return error(res, 'Question is required.', 400);
+      }
+      const superAdminAiService = require('../../ai/services/superAdminAiService');
+      const answer = await superAdminAiService.ask({ question });
+      return success(res, { answer });
+    } catch (err) { next(err); }
+  },
+
+  // 10. Broadcast System Announcement/Notification to all Clinic Dashboards
+  async broadcastNotification(req, res, next) {
+    try {
+      const { title, message } = req.body;
+      if (!title || !message) {
+        return error(res, 'Title and message are required.', 400);
+      }
+
+      const { pool } = require('../../config/db');
+
+      // Write to system_notifications table with clinic_id = NULL (representing global/all clinics)
+      const [result] = await pool.query(
+        `INSERT INTO system_notifications (clinic_id, title, message, is_read) 
+         VALUES (NULL, ?, ?, 0)`,
+        [title, message]
+      );
+
+      // Emit Socket.IO event system-wide
+      const SocketService = require('../../services/socketService');
+      const broadcastPayload = {
+        id: result.insertId,
+        clinic_id: null,
+        title,
+        message,
+        is_read: 0,
+        created_at: new Date()
+      };
+      
+      try {
+        SocketService.emitNotification(broadcastPayload);
+      } catch (wsErr) {
+        console.warn('Socket broadcast warning:', wsErr.message);
+      }
+
+      // Log in audit log
+      await pool.query(
+        `INSERT INTO audit_logs (clinic_id, user_id, action_type, description, ip_address) 
+         VALUES (NULL, ?, 'BROADCAST_ANNOUNCEMENT', ?, ?)`,
+        [req.user?.id || null, `Super Admin broadcasted system announcement: "${title}"`, req.ip || '127.0.0.1']
+      );
+
+      return success(res, { broadcastId: result.insertId }, 'System-wide announcement broadcasted successfully');
+    } catch (err) { next(err); }
+  },
+
+  // 11. Get global platform WhatsApp statistics
+  async getGlobalWhatsAppStats(req, res, next) {
+    try {
+      const { pool } = require('../../config/db');
+
+      // 1. Fetch connected clinics status
+      const [connectedClinics] = await pool.query(`
+        SELECT a.clinic_id, c.name as clinic_name, a.display_name, a.api_status, a.webhook_status, a.updated_at
+        FROM whatsapp_accounts a
+        JOIN clinics c ON a.clinic_id = c.id
+      `);
+
+      // 2. Fetch aggregate stats
+      const [msgStats] = await pool.query(`
+        SELECT status, direction, COUNT(*) as count
+        FROM whatsapp_messages
+        GROUP BY status, direction
+      `);
+
+      let totalOutbound = 0;
+      let totalInbound = 0;
+      let sent = 0;
+      let delivered = 0;
+      let read = 0;
+      let failed = 0;
+
+      msgStats.forEach(r => {
+        if (r.direction === 'inbound') {
+          totalInbound += r.count;
+        } else {
+          totalOutbound += r.count;
+          if (r.status === 'sent') sent += r.count;
+          else if (r.status === 'delivered') delivered += r.count;
+          else if (r.status === 'read') read += r.count;
+          else if (r.status === 'failed') failed += r.count;
+        }
+      });
+
+      const totalOut = sent + delivered + read + failed;
+      const successRate = totalOut > 0 ? parseFloat((((sent + delivered + read) / totalOut) * 100).toFixed(1)) : 100.0;
+
+      // 3. Fetch daily messages
+      const [dailyVolume] = await pool.query(`
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count
+        FROM whatsapp_messages
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY date ASC
+      `);
+
+      return success(res, {
+        connectedClinics,
+        stats: {
+          totalInbound,
+          totalOutbound: totalOut,
+          sent,
+          delivered,
+          read,
+          failed,
+          successRatePercent: successRate
+        },
+        dailyVolume
+      });
+    } catch (err) { next(err); }
+  },
+
+  // 12. List all platform subscription plans
+  async getSubscriptionPlans(req, res, next) {
+    try {
+      const { pool } = require('../../config/db');
+      const [rows] = await pool.query('SELECT * FROM subscription_plans ORDER BY price ASC');
+      return success(res, rows);
+    } catch (err) { next(err); }
+  },
+
+  // 13. Create or Edit subscription plans
+  async saveSubscriptionPlan(req, res, next) {
+    try {
+      const { pool } = require('../../config/db');
+      const { id, name, price, billing_cycle, features_json } = req.body;
+
+      if (!name || price === undefined) {
+        return error(res, 'Plan name and price are required', 400);
+      }
+
+      const featuresString = typeof features_json === 'string' 
+        ? features_json 
+        : JSON.stringify(features_json || {});
+
+      if (id) {
+        await pool.query(
+          `UPDATE subscription_plans 
+           SET name = ?, price = ?, billing_cycle = ?, features_json = ? 
+           WHERE id = ?`,
+          [name, price, billing_cycle || 'monthly', featuresString, id]
+        );
+        return success(res, null, 'Plan updated successfully');
+      } else {
+        const [result] = await pool.query(
+          `INSERT INTO subscription_plans (name, price, billing_cycle, features_json) 
+           VALUES (?, ?, ?, ?)`,
+          [name, price, billing_cycle || 'monthly', featuresString]
+        );
+        return success(res, { planId: result.insertId }, 'Plan created successfully');
+      }
+    } catch (err) { next(err); }
+  },
+
+  // 14. Update clinic subscription (Trial extend, suspend, reactivate, cancel)
+  async updateSubscriptionStatus(req, res, next) {
+    try {
+      const { pool } = require('../../config/db');
+      const { clinicId, action, daysToExtend, status, planId } = req.body;
+
+      if (!clinicId) return error(res, 'Clinic ID is required', 400);
+
+      const [existing] = await pool.query('SELECT * FROM subscriptions WHERE clinic_id = ?', [clinicId]);
+      if (existing.length === 0) return error(res, 'Clinic subscription record not found', 404);
+
+      const currentSub = existing[0];
+      let newStatus = status || currentSub.status;
+      let newEnd = currentSub.current_period_end;
+      let newPlanId = planId || currentSub.plan_id;
+
+      if (action === 'extend_trial') {
+        newStatus = 'trialing';
+        // Extend current trial end by X days
+        const baseDate = currentSub.trial_end ? new Date(currentSub.trial_end) : new Date();
+        baseDate.setDate(baseDate.getDate() + parseInt(daysToExtend || 7));
+        newEnd = baseDate;
+        
+        await pool.query(
+          `UPDATE subscriptions 
+           SET trial_end = ?, status = 'trialing', updated_at = NOW() 
+           WHERE clinic_id = ?`,
+          [newEnd, clinicId]
+        );
+      } 
+      else if (action === 'suspend') {
+        newStatus = 'suspended';
+        await pool.query(
+          `UPDATE subscriptions SET status = 'suspended', updated_at = NOW() WHERE clinic_id = ?`,
+          [clinicId]
+        );
+      } 
+      else if (action === 'reactivate') {
+        newStatus = 'active';
+        await pool.query(
+          `UPDATE subscriptions SET status = 'active', updated_at = NOW() WHERE clinic_id = ?`,
+          [clinicId]
+        );
+      } 
+      else if (action === 'change_plan') {
+        await pool.query(
+          `UPDATE subscriptions SET plan_id = ?, status = 'active', updated_at = NOW() WHERE clinic_id = ?`,
+          [newPlanId, clinicId]
+        );
+      }
+
+      // Log the modification in subscription_logs
+      await pool.query(
+        `INSERT INTO subscription_logs (clinic_id, user_id, action_type, old_plan_id, new_plan_id, description) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          clinicId, 
+          req.user?.id || null, 
+          action.toUpperCase(), 
+          currentSub.plan_id, 
+          newPlanId, 
+          `Operator action: "${action}". Status changed from "${currentSub.status}" to "${newStatus}"`
+        ]
+      );
+
+      return success(res, null, 'Subscription updated successfully');
+    } catch (err) { next(err); }
+  },
+
+  // 15. Get global revenue statistics and reports (MRR, ARR, forecasts, CSV exports)
+  async getGlobalRevenueReport(req, res, next) {
+    try {
+      const { pool } = require('../../config/db');
+
+      // 1. Calculate MRR & ARR from active subscriptions
+      const [subs] = await pool.query(`
+        SELECT s.clinic_id, p.price, p.billing_cycle, s.status
+        FROM subscriptions s
+        JOIN subscription_plans p ON s.plan_id = p.id
+        WHERE s.status IN ('active', 'reactivated')
+      `);
+
+      let mrr = 0.00;
+      subs.forEach(s => {
+        const price = parseFloat(s.price);
+        if (s.billing_cycle === 'yearly' || s.billing_cycle === 'annual') {
+          mrr += price / 12;
+        } else if (s.billing_cycle === 'quarterly') {
+          mrr += price / 3;
+        } else {
+          mrr += price;
+        }
+      });
+
+      const arr = mrr * 12;
+      const forecast = mrr * 1.15; // 15% growth forecast
+
+      // 2. Counts of clinics by status
+      const [statusCounts] = await pool.query(`
+        SELECT status, COUNT(*) as count 
+        FROM subscriptions 
+        GROUP BY status
+      `);
+
+      // 3. Top plans metrics
+      const [topPlans] = await pool.query(`
+        SELECT p.name, COUNT(s.id) as active_count
+        FROM subscriptions s
+        JOIN subscription_plans p ON s.plan_id = p.id
+        GROUP BY p.name
+        ORDER BY active_count DESC
+      `);
+
+      // 4. Usage summaries (AI requests, WhatsApp, Emails, Storage)
+      const [[usageSummary]] = await pool.query(`
+        SELECT 
+          SUM(ai_requests_count) as total_ai,
+          SUM(whatsapp_messages_count) as total_whatsapp,
+          SUM(emails_count) as total_emails,
+          SUM(storage_bytes) as total_storage
+        FROM feature_usage
+      `);
+
+      // 5. Total invoices billing history list
+      const [invoices] = await pool.query(`
+        SELECT i.*, c.name as clinic_name
+        FROM invoices i
+        JOIN clinics c ON i.clinic_id = c.id
+        ORDER BY i.id DESC
+      `);
+
+      return success(res, {
+        mrr: parseFloat(mrr.toFixed(2)),
+        arr: parseFloat(arr.toFixed(2)),
+        forecast: parseFloat(forecast.toFixed(2)),
+        statusCounts,
+        topPlans,
+        usageSummary: usageSummary || { total_ai: 0, total_whatsapp: 0, total_emails: 0, total_storage: 0 },
+        invoices
+      });
+    } catch (err) { next(err); }
+  },
+
+  // 16. Server monitoring stats
+  async getMonitoringStats(req, res, next) {
+    try {
+      const { pool } = require('../../config/db');
+      const os = require('os');
+
+      // CPU and memory usage info
+      const freeMemBytes = os.freemem();
+      const totalMemBytes = os.totalmem();
+      const usedMemBytes = totalMemBytes - freeMemBytes;
+      const memUsagePercent = parseFloat(((usedMemBytes / totalMemBytes) * 100).toFixed(1));
+
+      const loadAvg = os.loadavg();
+      const cpusCount = os.cpus().length;
+
+      // Active counts
+      const [[{ clinicsCount }]] = await pool.query('SELECT COUNT(*) as clinicsCount FROM clinics');
+      const [[{ usersCount }]] = await pool.query('SELECT COUNT(*) as usersCount FROM clinic_users');
+      const [[{ apptsCount }]] = await pool.query('SELECT COUNT(*) as apptsCount FROM appointments');
+
+      // Database health status
+      let dbHealthy = false;
+      try {
+        const [testRes] = await pool.query('SELECT 1');
+        if (testRes) dbHealthy = true;
+      } catch (e) {
+        dbHealthy = false;
+      }
+
+      return success(res, {
+        server: {
+          platform: os.platform(),
+          uptimeHours: parseFloat((os.uptime() / 3600).toFixed(1)),
+          cpusCount,
+          loadAvg1m: loadAvg[0],
+          memory: {
+            totalGB: parseFloat((totalMemBytes / (1024 * 1024 * 1024)).toFixed(1)),
+            usedGB: parseFloat((usedMemBytes / (1024 * 1024 * 1024)).toFixed(1)),
+            usagePercent: memUsagePercent
+          }
+        },
+        database: {
+          healthy: dbHealthy,
+          clinicsCount,
+          usersCount,
+          apptsCount
+        },
+        avgApiResponseTimeMs: 45 // Sandbox static average measure
+      }, 'Server health and monitoring telemetry resolved.');
+    } catch (err) { next(err); }
   }
 };
 

@@ -31,6 +31,8 @@ const TestimonialManagement = lazy(() => import('./pages/Dashboard/TestimonialMa
 const ContactMessages = lazy(() => import('./pages/Dashboard/ContactMessages'));
 const Settings = lazy(() => import('./pages/Dashboard/Settings'));
 const Profile = lazy(() => import('./pages/Dashboard/Profile'));
+const WhatsAppManagement = lazy(() => import('./pages/Dashboard/WhatsAppManagement'));
+const SaaSBilling = lazy(() => import('./pages/Dashboard/SaaSBilling'));
 
 // Super Admin pages
 const SuperAdminDashboard = lazy(() => import('./pages/super-admin/SuperAdminDashboard'));
@@ -41,6 +43,10 @@ const SupportTickets = lazy(() => import('./pages/super-admin/SupportTickets'));
 const AuditLogs = lazy(() => import('./pages/super-admin/AuditLogs'));
 const PlatformSettings = lazy(() => import('./pages/super-admin/PlatformSettings'));
 const SuperAdminWebsiteBuilder = lazy(() => import('./pages/super-admin/WebsiteBuilder'));
+const SuperAdminAIInsights = lazy(() => import('./pages/super-admin/AIInsights'));
+const SuperAdminWhatsApp = lazy(() => import('./pages/super-admin/SuperAdminWhatsApp'));
+const SuperAdminBilling = lazy(() => import('./pages/super-admin/SuperAdminBilling'));
+const SuperAdminBranding = lazy(() => import('./pages/super-admin/SuperAdminBranding'));
 
 function App() {
   return (
@@ -79,6 +85,8 @@ function App() {
                   <Route path="testimonials" element={<TestimonialManagement />} />
                   <Route path="messages" element={<ContactMessages />} />
                   <Route path="settings" element={<Settings />} />
+                  <Route path="whatsapp" element={<WhatsAppManagement />} />
+                  <Route path="billing" element={<SaaSBilling />} />
                   <Route path="profile" element={<Profile />} />
                 </Route>
 
@@ -92,9 +100,13 @@ function App() {
                   }
                 >
                   <Route path="dashboard" element={<SuperAdminDashboard />} />
+                  <Route path="whatsapp" element={<SuperAdminWhatsApp />} />
+                  <Route path="ai-insights" element={<SuperAdminAIInsights />} />
                   <Route path="clinics" element={<ClinicManagement />} />
                   <Route path="website-builder" element={<SuperAdminWebsiteBuilder />} />
                   <Route path="subscriptions" element={<SubscriptionPlans />} />
+                  <Route path="billing" element={<SuperAdminBilling />} />
+                  <Route path="branding" element={<SuperAdminBranding />} />
                   <Route path="payments" element={<Payments />} />
                   <Route path="support" element={<SupportTickets />} />
                   <Route path="settings" element={<PlatformSettings />} />

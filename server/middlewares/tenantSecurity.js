@@ -94,9 +94,35 @@ const xssSanitizer = (req, res, next) => {
   next();
 };
 
+/**
+ * Express middleware to validate tenant (clinic) isolation and prevent IDOR/BOLA cross-tenant access.
+ */
+const tenantIsolationGuard = (req, res, next) => {
+  // Bypassed for Super Admins
+  if (req.user && req.user.role === 'super_admin') {
+    return next();
+  }
+
+  const clinicIdHeader = req.headers['x-clinic-id'];
+  const parameterClinicId = req.params?.clinicId || req.query?.clinicId || req.body?.clinicId || req.clinicId;
+  const targetClinicId = parameterClinicId ? parseInt(parameterClinicId) : (clinicIdHeader ? parseInt(clinicIdHeader) : null);
+  
+  if (req.user) {
+    const userClinicId = req.user.clinic_id;
+    if (targetClinicId && userClinicId !== targetClinicId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden. Cross-tenant access attempt blocked.'
+      });
+    }
+  }
+  next();
+};
+
 module.exports = {
   validateBody,
   validateQuery,
   centralizedErrorHandler,
-  xssSanitizer
+  xssSanitizer,
+  tenantIsolationGuard
 };

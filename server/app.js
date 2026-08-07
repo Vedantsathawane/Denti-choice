@@ -112,6 +112,8 @@ app.use('/api/super-admin', require('./routes/superAdmin/superAdminRoutes'));
 app.use('/api/clinic', require('./routes/clinic/clinicRoutes'));
 app.use('/api/billing', require('./routes/clinic/billingRoutes'));
 app.use('/api/public/clinic', require('./routes/public/publicClinicRoutes'));
+app.use('/api/whatsapp', require('./whatsapp/routes/whatsappRoutes'));
+app.use('/api/media', require('./routes/clinic/mediaRoutes'));
 
 // Setup Swagger Documentation
 const { setupSwagger } = require('./config/swagger');

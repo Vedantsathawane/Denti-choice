@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import {
   FaTooth, FaChartPie, FaCalendarAlt, FaUserMd, FaConciergeBell,
   FaStar, FaEnvelope, FaCog, FaUser, FaSignOutAlt, FaBars, FaTimes,
-  FaBell, FaMoon, FaSun, FaTrash
+  FaBell, FaMoon, FaSun, FaTrash, FaWhatsapp, FaCreditCard
 } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
@@ -24,6 +24,8 @@ const sidebarLinks = [
   { name: 'Appointments', path: '/dashboard/appointments', icon: FaCalendarAlt },
   { name: 'Doctors', path: '/dashboard/doctors', icon: FaUserMd },
   { name: 'Services', path: '/dashboard/services', icon: FaConciergeBell },
+  { name: 'WhatsApp', path: '/dashboard/whatsapp', icon: FaWhatsapp },
+  { name: 'Billing', path: '/dashboard/billing', icon: FaCreditCard },
   { name: 'Testimonials', path: '/dashboard/testimonials', icon: FaStar },
   { name: 'Messages', path: '/dashboard/messages', icon: FaEnvelope },
   { name: 'Settings', path: '/dashboard/settings', icon: FaCog },
